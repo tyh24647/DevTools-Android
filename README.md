@@ -1,54 +1,53 @@
-# ⚙︎ DevTools — Android
+# ⚙︎ DevTools for Android
 
-A native Kotlin / Jetpack Compose app with a tabbed Android WebView browser. Based on `tyh24647/DevTools-2-master` commit `9df942d8387ebe168d3279e31404e5e80f1a6716` (October 7, 2026).
+A native Android developer browser with Eruda debugging tools, a Firefox companion add-on, and six browser share actions. Built with Kotlin and Jetpack Compose, alongside the [DevTools for iOS](https://github.com/tyh24647/DevTools-2-master) project.
 
-## Run
+Inspect webpages, run custom plugins and userscripts, apply page CSS, and save images or videos into a local media library.
 
-A prebuilt debug APK is included at **Build/DevTools-debug.apk**. Unzip the download and install that APK on Android, or build the source below.
+DevTools defaults to **enabled**, **run on every webpage**, and **automatic tool updates**. Selected blacklists take priority over AllowLists. The app opens on **Browsers**, where the native browser and Firefox have separate settings.
 
-1. Open this directory in Android Studio (an AGP 8.13-compatible version or newer).
-2. Use JDK 17 and install Android SDK Platform 36. Android Studio supplies your own `local.properties`.
-3. Sync Gradle, select the **app / debug** variant, and Run on Android 8.0 (API 26) or newer.
-4. Keep Android System WebView up to date for document-start injection. The app detects unsupported versions and falls back to injection after page load.
-5. Paste a URL, or share a page URL from Chrome to one of the six DevTools actions.
+## Open and run
 
-Command-line build:
+1. Open this repository in Android Studio with support for Android Gradle Plugin **9.4.1**.
+2. Install Android SDK Platform **36** and use the compatible JDK bundled with Android Studio. Java/Kotlin compilation targets Java 17; Gradle uses the included **9.6.0** wrapper.
+3. Select **app / debug** and run on Android **8.0 (API 26)** or newer.
+4. Keep Android System WebView updated. Document-start injection is used when supported; older providers fall back to injection after page load.
+5. Open **Browser** and enter a URL, or share a page URL into DevTools.
+6. Use **Browsers** to configure automatic activation, AllowLists, and blacklists.
 
 ```sh
-./gradlew :app:assembleDebug :app:testDebugUnitTest
+./gradlew :app:assembleDebug
 ```
 
-The debug package ID is `com.tyh24647.devtools.debug`; release is `com.tyh24647.devtools`. The debug build uses Android's standard debug signing certificate and enables Pro preview by default. It does not represent a paid purchase. Release has no preview entitlement.
+The APK is generated at `app/build/outputs/apk/debug/app-debug.apk`. Local packaged builds may also be available in `Build/`; that directory is excluded from Git. The debug package is `com.tyh24647.devtools.debug`; release is `com.tyh24647.devtools`.
 
-## Browser boundary
+JavaScript tools and the code editor are bundled, so npm is only needed when rebuilding those assets or running JavaScript tests. Debug builds include a switchable **Pro preview** for development; release builds do not.
 
-Chrome for Android does not provide an extension installation mechanism. This app controls its **own** WebViews. Sharing from Chrome transfers a URL; it does not transfer Chrome's cookies, DOM, history or active JavaScript state. Show/Hide controls the page opened in DevTools, not the original Chrome tab. The app can be chosen as a browser for HTTP/HTTPS links.
+## Included behavior
 
-A Firefox-for-Android preview add-on is included at `Build/DevTools-Firefox-preview.xpi`. It operates inside Firefox and pairs with the Android app for browser-specific settings. Open **Browsers** in the app for separate DevTools and Firefox tabs, each with its own Enabled, Run on every page, AllowLists and blacklists. See [Firefox setup and limitations](FirefoxExtension/README.md). The preview is unsigned and requires temporary developer installation until Mozilla signing is completed.
+| Feature | Implementation |
+| --- | --- |
+| Run everywhere | Enabled by default; selected blacklists exclude matching pages |
+| Allow-only mode | Turn off Run on every webpage; selected AllowLists permit matching pages |
+| Named lists | Create, rename, change type, select, and delete lists per browser |
+| Rules | Domain/subdomains, exact URL, wildcard, and bounded JavaScript regex |
+| Precedence | Disabled → blacklist deny → run everywhere → AllowList match → deny |
+| Browser profiles | Independent native-browser and Firefox settings |
+| Show / Hide | Open or hide the console without discarding the active console session |
+| Tabbed browser | Up to twelve tabs, back/forward, reload, close, uploads, and URL sharing |
+| Restored tabs | Saved URLs load when opened; live page state does not survive process death |
+| Camera and microphone | Website consent plus Android runtime permissions on secure pages |
+| Eruda tools | Console, Elements, Sources, Resources, and additional inspection panels |
+| Resource timing | Filters, DNS/connect/TLS/TTFB/download timings, bytes, and waterfall |
+| Plugins and userscripts | Create, import, edit, enable, export, delete, and organize source files |
+| Code editor | Highlighting, completion, formatting, themes, invisibles, and bracket preferences |
+| CSS editor | Apply/reset page styles and optionally save/reapply CSS per site |
+| Saved resources | Thumbnail file browser with folders, previews, sharing, and export |
+| Video downloads | Direct media downloads and supported HLS-to-MP4 remuxing |
+| Live recording | Record a supported live HLS stream until Stop or source/page unload |
+| Appearance | System/light/dark modes, accent presets, and native cards/navigation |
 
-## Custom Eruda plugins
-
-The app opens on Browsers. Use the Plugins tab to import a local JavaScript file, paste/edit source, or try the example panel. Saving or editing leaves a plugin disabled; enable it when ready. Select Eruda in Tools. Plugins apply only to the built-in DevTools browser and obey its page rules.
-
-A plugin file returns an Eruda tool or factory, or exports one through module.exports. The eruda parameter is provided. ES modules must be bundled first. Up to 20 plugins, 256 KB each, can be stored. Code runs with the inspected page's access; only import trusted code. Plugins should clean up listeners/timers in destroy. Site CSP can block evaluation. Errors appear in runtime warnings. The Plugins page links to the official writing guide, API reference and starter template.
-
-## Features
-
-- Enabled, run-everywhere and automatic package updates default to on.
-- Selected blacklists always override run-everywhere and selected AllowLists.
-- Allow-only mode combines selected AllowLists; unmatched pages are excluded.
-- Create, rename, change type, select/deselect and delete named lists.
-- Create, edit, enable/disable and delete domain, exact-URL, wildcard and regex rules.
-- The same JavaScript rule engine and requested six groups of Eruda defaults as iOS.
-- Regex runs in a dedicated Worker with a 750 ms deadline. Patterns are bounded to 512 characters, URLs to 4096, i/m/u flags; backreferences, lookarounds and repeated complex groups are excluded. Worker failures or site CSP restrictions exclude the page.
-- Route polling every 500 ms detects SPA URL changes. Settings updates replace the document-start script and refresh open pages. Matching can occur after initial page scripts, especially with asynchronous regex rules; it does not promise capture of every request from the first byte of navigation.
-- Twelve live tabs, back/forward/reload, user-initiated popups, document picker for file uploads, URL sharing and reopening existing shared URLs.
-- Tab URLs persist; process restarts reload them. Live JavaScript state is not restored after process death.
-- Pro controls: Eruda/vConsole, modern/legacy Vue adapter, code, DOM, resource timing, navigation timing, FPS and feature detection. Size, opacity, theme and remembered icon position.
-- Resource timing includes a buffered resource observer, filters, DNS/connect/TLS/TTFB/download/start/duration/bytes and waterfall. Cross-origin details depend on Timing-Allow-Origin. This is page-level instrumentation, not Chrome's full protocol debugger or packet capture.
-- System/light/dark appearance and four accents, adapting the existing RegexDojo-inspired icon and card style.
-
-The six Android activity-alias share targets are:
+The six Android share targets are:
 
 - ⚙︎ DevTools - Add to Blacklist
 - ⚙︎ DevTools - Add to AllowList
@@ -57,84 +56,124 @@ The six Android activity-alias share targets are:
 - ⚙︎ DevTools - Enable
 - ⚙︎ DevTools - Disable
 
-Android and browser share-sheet implementations control ordering, truncation and grouping; some show several DevTools targets behind an expanded app entry. Enable/Disable changes the app-wide setting. Adding to an inactive list preserves its inactive state.
+Android controls their ordering, grouping, and displayed labels. Sharing a URL opens it in DevTools; the original browser's cookies, DOM, and JavaScript session are separate.
 
-## Bundled tools and updates
+## Firefox companion
 
-Ten npm bundles from the updated iOS repository are included: Eruda 3.4.3, eruda-vue 1.1.1, eruda-vue-devtools 1.0.1, vConsole 3.15.1, vue-vconsole-devtools 1.0.9, eruda-code 2.2.0, eruda-dom 2.0.0, eruda-timing 2.0.1, eruda-fps 2.0.0 and eruda-features 2.1.0. Their wrappers keep package exports separate from page-owned globals. Only selected libraries execute. The FPS compatibility shim remains outside upstream code.
+The Firefox preview runs Eruda inside Firefox and pairs with **Browsers → Firefox** in the Android app. Its responsive menu includes Show/Hide and synchronized Enabled/Run on every page toggles. Manage per-browser lists in the app.
 
-When automatic updates are enabled, each app opening/foreground checks npm latest metadata, with jsDelivr resolution fallback. Version-pinned jsDelivr files are checked against the service's SHA-256 metadata before atomic cache installation. Cache bytes are verified again before use. Network failures and corrupt caches retain the bundled installation. Turning automatic updates off preserves already-installed versions; Clear downloaded packages restores the bundled versions on new page loads. Already-loaded assets remain in their page until reload. A newer adapter may introduce incompatibilities; clear the cache and reload to recover.
+```sh
+npm run build:firefox
+```
 
-Android does not run npm inside the app. Development-time `npm run update:tools` refreshes offline bundles. Runtime JS updates do not download APK, dex, JAR or native-library code. No visited page receives an Android JavaScript interface. Store review requirements still apply to interpreted downloaded code and app behavior.
+This creates `Build/DevTools-Firefox-preview.xpi`. Temporary add-ons disappear when Firefox restarts; persistent installation requires Mozilla signing. Firefox internal pages and protected sites remain inaccessible. The companion currently includes Eruda and resource timing; native plugins, userscripts, and the saved-media bridge are not included.
+
+See [Firefox setup and limitations](FirefoxExtension/README.md) for pairing, installation, permissions, and preview status. Chrome URL sharing opens the native browser; it does not install a Chrome extension.
+
+## Plugins, userscripts, and page CSS
+
+Open **Plugins** to create a script or import a local JavaScript file or direct JavaScript URL. Imports are parsed for review without executing them. New and edited scripts remain disabled until enabled; reload the target page after changes.
+
+- **Eruda panels:** return a tool/factory or export it through `module.exports`. Bundle ES modules first.
+- **Userscripts:** new scripts include a metadata-header template. Supported features include HTTP(S) matching/exclusions, document start/end/idle, styles, logging, and per-script/per-origin GM storage.
+- **Organization:** nested folders and colored tags; removing a folder keeps its scripts in the root.
+- **Editor:** JavaScript highlighting, completion for variables declared above the cursor, Prettier formatting, light/dark themes, invisibles, matching/closing brackets, and indentation preferences through the settings cog.
+- **CSS panel:** the bundled CSS editor is enabled on first installation. Apply a draft, reset page styles, save CSS for the origin, or automatically reapply saved CSS. Saved CSS uses page-visible localStorage.
+
+Up to 20 scripts of 256 KB each can be stored. Scripts run with the inspected page's access. Userscripts implement a subset of Tampermonkey; external dependencies, privileged cross-origin networking, and arbitrary grants are unsupported. These features currently apply to the native browser.
+
+## Saved images, videos, and live streams
+
+**Resources contains only explicitly saved files.** Discovered URLs stay in Eruda. Save from Eruda's media preview, long-press a page image, or use a video's download button.
+
+The library shows image/video thumbnails, supports folders and hidden-file visibility, and offers previews, sharing, export, and system Files access. Unsupported thumbnail codecs fall back to a file icon. Choose a default app folder and optionally an additional export destination.
+
+Direct media is copied; supported HLS is remuxed into MP4 using Android MediaExtractor/MediaMuxer without transcoding. Live recordings finalize on Stop or source/page unload. Transfers show progress and completed files appear after finalization. Optional resolution selection defaults to off, choosing the highest-resolution HLS rendition.
+
+Extractor/codec support varies by device. DRM, encrypted fragmented MP4, and changing track formats are unsupported. See the [test coverage and remaining media checks](Documentation/TESTING.md).
+
+## Bundled tools and defaults
+
+| Package | Version | Role |
+| --- | --- | --- |
+| eruda | 3.4.3 | Core console |
+| eruda-vue | 1.1.1 | Current Vue adapter |
+| eruda-vue-devtools | 1.0.1 | Legacy Vue adapter |
+| vconsole | 3.15.1 | Alternative console |
+| vue-vconsole-devtools | 1.0.9 | Vue adapter for vConsole |
+| eruda-code | 2.2.0 | Code panel |
+| eruda-dom | 2.0.0 | DOM explorer |
+| eruda-timing | 2.0.1 | Navigation timing |
+| eruda-fps | 2.0.0 | Frame-rate monitor |
+| eruda-features | 2.1.0 | Browser feature detection |
+
+Defaults follow the iOS project: asynchronous console rendering, global-error capture, console override, detailed object inspection, a 55% panel at 0.98 opacity, Material Palenight, observed elements/resources, and a remembered viewport-clamped entry-button position.
+
+Only selected tools initialize. Vue inspection depends on compatible page hooks, which production builds may omit. Cross-origin timing details require the page server's `Timing-Allow-Origin` header.
+
+Automatic updates check npm metadata and fetch version-pinned known bundles through jsDelivr. SHA-256 checks and atomic cache installation guard against incomplete/corrupt downloads. Bundled tools remain available offline; clearing downloaded packages restores them on new page loads. Existing pages keep their loaded tools until reload. Android runtime updates are not governed by the iOS project's Debug/Release distinction; review distribution requirements before release.
+
+## Purchases and ads
+
+| Product ID | Type | Intended US price |
+| --- | --- | --- |
+| `devtools_pro_monthly` | Monthly subscription | $2.99/month |
+| `devtools_pro_lifetime` | Non-consumable purchase | $19.99 |
+
+Pro unlocks additional tool and appearance controls and suppresses ads. Google Play supplies actual localized prices. Purchases are platform-specific; App Store purchases do not transfer automatically. Buying lifetime does not cancel an existing subscription.
+
+Configure Play products and the licensing public key before purchase testing. Local signature verification, pending purchases, acknowledgement, refresh, and restore are implemented; authoritative server-side verification and real Play-track testing remain release work.
+
+Ads default to **off**. Optional AdMob/UMP integration uses test IDs unless configured otherwise:
+
+```sh
+./gradlew :app:assembleDebug -PdevtoolsAds=true
+```
+
+Disable Debug Pro preview to test ads. See [release configuration](Documentation/RELEASE.md) before configuring production billing, signing, consent, or ad IDs. Keep private signing keys and service credentials outside Git.
+
+## Development commands
 
 ```sh
 npm ci --ignore-scripts
 npm test
 npx playwright install chromium
 npm run test:browser
-npm run update:tools
+npm run test:firefox-browser
+npm run test:media-browser
+npm run test:editor-browser
+npm run test:css-browser
+./gradlew :app:testDebugUnitTest :app:lintDebug
 ```
 
-`DEVTOOLS_BROWSER_PATH` can select an existing Chromium executable for browser tests. Upstream license notices are included in the app and `Licenses/`; update/review notices when changing dependencies.
+Rebuild editor assets with `npm run build:editor`; rebuild the Firefox package with `npm run build:firefox`. Instrumentation tests live in `app/src/androidTest` and require a connected Android device.
 
-## Purchases
+## Structure and boundaries
 
-Create these products in your Google Play Console for the release package:
+- `app/`: native UI, browser, configuration, billing, permissions, media library, and bundled tools.
+- `FirefoxExtension/`: companion add-on, popup, settings sync, and page runtime.
+- `Editor/`: local code-editor source and validation.
+- `Scripts/`: asset and extension build scripts.
+- `Tests/`: JavaScript unit tests and browser checks.
+- `Documentation/`: release setup and verification details.
+- `Licenses/` and `Shared/`: upstream notices and package metadata.
 
-| Product | Type | Intended US price |
-| --- | --- | --- |
-| devtools_pro_monthly | Subscription with a monthly base plan | $2.99/month |
-| devtools_pro_lifetime | Non-consumable one-time product | $19.99 |
+This is page-context debugging. Site CSP, browser permissions, protected pages, and cross-origin restrictions can limit inspection. The app does not share Chrome's profile or provide an OS-level protocol debugger.
 
-Purchases are platform-specific; existing App Store purchases do not automatically transfer to Android. The UI displays Google Play's actual localized prices, not fabricated purchase prices. Add your licensing **public** RSA key via the `billingPublicKey` Gradle property. Without a configured key the app will not launch real purchases or trust purchase signatures. Do not add private signing keys or service-account credentials to the repository.
+Incoming URLs are restricted to HTTP(S) without embedded credentials. TLS errors are canceled; HTTP is available for local development and mixed content remains blocked. Third-party cookies and automatic popups are disabled. Camera/microphone require consent; Android privacy controls remain authoritative. Clearing browser data closes tabs and clears cookies, cache, and WebStorage.
 
-The implementation queries active purchases at connection, foreground and every three minutes while resumed, verifies Play purchase signatures locally, handles pending/cancelled/owned states, acknowledges valid purchases and supports restore. Entitlements are not accepted from pages or configuration files. Subscription availability is based on successful Play queries; a failed refresh preserves in-process access for at most 24 hours after the last successful query. Access is not persisted across process restarts. A purchase backend using the Play Developer API and RTDN is recommended before production to defend against replay and maintain authoritative revocation/expiry state. Buying lifetime does not cancel a monthly subscription.
-
-Use a Play internal-testing track and license testers to test real purchase flows. Debug Pro preview can be switched off from the Pro screen to inspect the free experience; release builds cannot enable it.
-
-## Ads
-
-The updated repository disables ads by default, so this port also defaults to **ads off**. To enable the implemented native AdMob integration:
-
-```sh
-./gradlew :app:assembleDebug -PdevtoolsAds=true
-```
-
-Also switch off Debug Pro preview to see ads. Google test app/banner/interstitial/app-open IDs are the defaults. Configure `admobAppId`, `adBanner`, `adInterstitial` and `adOpen` Gradle properties for your account before release. UMP handles consent and privacy options; requests are non-personalized. Ad requests do not include browsing URLs, rules, console logs or timing records. Ad SDKs can still process device/network/ad interaction information.
-
-Native banners appear at the bottom of the app shell. Completing a rule save refreshes the banner and makes an interstitial eligible. Three minutes makes an interstitial eligible at the next completed edit or app navigation. App-open ads can display on returning from the background, excluding initial launch, the Pro screen and active shared-rule dialogs. Full-screen ads are at least 30 seconds apart. No fill or unavailable consent never blocks a rule save. Pro suppresses ads. Test consent, ad availability and lifecycle behavior on a device before enabling production ads.
-
-## Browser privacy and limits
-
-- No JavascriptInterface or purchase/settings bridge is exposed to visited pages. A bounded media message listener accepts discovery, share, stop and native-confirmed save requests.
-- Native settings are private, atomically saved, and malformed storage fails closed until reset.
-- Incoming URLs are restricted to HTTP(S), without embedded credentials. File/content/intent/javascript schemes are rejected.
-- Third-party cookies, camera/microphone and automatic popups are disabled; file uploads require the document picker.
-- TLS certificate errors are cancelled. HTTP navigation is deliberately available for local development; mixed content remains blocked.
-- Clear browser data closes tabs and clears cookies, cache and WebStorage. Android backup is disabled.
-- Download links can be handled by another browser using Open externally; there is no background download manager in this version.
-- This developer browser is not a complete Chrome replacement: Chrome profile sync, passkeys, DRM media and every site-specific authentication flow are not guaranteed. Production Vue builds may omit the hooks needed for inspection. Cross-origin iframe inspection is not implemented.
+Visited pages receive no unrestricted Android JavaScript interface. A bounded media listener handles explicit, native-confirmed saves and related media actions. Regex rules run in a worker with a deadline; worker or policy failures exclude the page.
 
 ## Validation
 
-See `Documentation/TESTING.md` for the completed build/test evidence and the device checks still needed. Automated Chromium results prove the JavaScript runtime, not the Android WebView provider, Google Play, share-sheet rendering or AdMob delivery on a physical phone.
+Builds, JVM/Node tests, browser smoke checks, and selected physical-device workflows have passed, including real camera/microphone capture, editor rendering/recovery, and HLS VOD/live finalization. This does not establish complete coverage across Android versions, codecs, Google Play, or AdMob.
 
+See [completed checks and remaining device tests](Documentation/TESTING.md).
 
-## Userscripts and saved media (native browser)
+## References
 
-Plugins includes Eruda panels and userscripts. Create or import JavaScript, then enable it and reload the inspected page. Userscripts support HTTP(S) match/include/exclude rules, document start/end/idle and a limited GM API for styles, logging and per-script, per-origin storage. This is a subset of Tampermonkey: external dependencies, cross-origin privileged requests and arbitrary grants are rejected. Scripts execute in the page context and their storage is page-visible.
-
-Resources is a saved-file browser for private app media, with image/video thumbnails, folder creation/deletion, hidden-file controls, previews, sharing, export and system Files access. It contains only explicitly saved files. Discovered page URLs stay in Eruda; save there, long-press a page image, or use a video download button. Set a default app folder and optionally an additional export folder. Video quality selection is off by default, choosing the highest-resolution HLS rendition.
-
-Visible video elements have save/record controls. Eruda Resources shows discovered page media before Images with type-correct image/audio/video previews and share/save actions. Native downloads copy direct media or remux HLS into MP4 using Android MediaExtractor/MediaMuxer without transcoding. Live recording ends on source/page unload or Stop and save. Foreground transfers show progress; completed files become available only after finalization. Supported clear/AES-128 HLS depends on device extractors/codecs; DRM, encrypted fragmented MP4 and changing track formats are rejected. No DRM bypass is provided. Media3 supplies optional HLS preview (Apache 2.0, https://github.com/androidx/media).
-
-These userscript/media features currently apply to the native browser. The Firefox add-on does not yet provide this media/library integration.
-
-
-Script management includes direct JavaScript URL import, parse validation without running imported code, editable/exportable source, nested folders and colored tags. Removing a script folder keeps its scripts in the root. The local CodeMirror editor provides JavaScript highlighting, completion including declarations above the cursor, Prettier formatting, light/dark themes, invisibles, bracket matching/closing and indentation preferences behind the settings cog.
-
-A bundled CSS editor Eruda panel is installed and enabled once. It applies a draft stylesheet to the current page, resets it, and optionally saves/reapplies CSS per origin using page-visible localStorage. Delete saved CSS removes the stored stylesheet. The Plugins tab can edit, disable or delete the panel, and offers it again for manual installation after deletion.
-
-### Webpage camera and microphone
-
-The native browser supports camera and microphone capture on secure webpages. Each request shows the requesting origin and asks for website consent, followed by Android permissions when needed. Unknown WebView resources are denied. Navigating away, closing the tab or losing its renderer cancels pending requests. Android privacy toggles still apply.
+- [DevTools for iOS](https://github.com/tyh24647/DevTools-2-master)
+- [Eruda](https://github.com/liriliri/eruda)
+- [CodeMirror](https://codemirror.net/)
+- [Prettier](https://prettier.io/)
+- [Mozilla Extension Workshop](https://extensionworkshop.com/)

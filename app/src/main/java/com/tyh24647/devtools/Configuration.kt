@@ -95,6 +95,12 @@ class Configuration(context: Context) {
         }
     }
 
+    fun changeConsoleUI(key: String, value: Any): Boolean = change { root ->
+        require(key in listOf("wrapText", "entryColor"))
+        root.getJSONObject("console").put(key, value)
+        root.optJSONObject("browserProfiles")?.optJSONObject("firefox")?.put("revision", UUID.randomUUID().toString())
+    }
+
     fun bridge(): JSONObject = JSONObject(data.toString()).apply { remove("browserProfiles") }.put("pro", pro)
 
     fun profile(browserID: String): JSONObject =
@@ -232,6 +238,8 @@ class Configuration(context: Context) {
                         .put("displaySize", 55.0)
                         .put("transparency", 0.98)
                         .put("theme", "Material Palenight")
+                        .put("wrapText", true)
+                        .put("entryColor", "")
                         .put("rememberPosition", true)
                         .put("positionX", 263.807642)
                         .put("positionY", 0)

@@ -4,7 +4,7 @@ import { execFileSync } from 'node:child_process';
 const root=path.resolve(import.meta.dirname,'..');
 const target=path.join(root,'FirefoxExtension','tools');
 await fs.mkdir(target,{recursive:true});
-for(const file of ['rule-engine.js','page-runtime.js','resource-timing.js']) {
+for(const file of ['rule-engine.js','page-runtime.js','resource-timing.js','source-formatting.js','SOURCE-FORMATTING-NOTICES.txt']) {
     const source = await fs.readFile(path.join(root,'app/src/main/assets/tools',file),'utf8');
     // User-supplied executable plugins are a native browser feature.
     await fs.writeFile(path.join(target,file),source.replace(/\s*\/\/ NATIVE_PLUGINS_START[\s\S]*?\/\/ NATIVE_PLUGINS_END/g, ''));

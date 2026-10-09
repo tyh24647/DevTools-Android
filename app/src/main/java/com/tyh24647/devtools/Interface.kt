@@ -59,7 +59,7 @@ fun DevToolsUI(activity: MainActivity) {
                     Banner(activity)
                     NavigationBar {
                         Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())) {
-                        listOf("Browser", "Browsers", "Plugins", "Resources", "Tools", "Pro", "Settings").forEach { title ->
+                        AppNavigation.visible(config.data).forEach { title ->
                             NavigationBarItem(
                                 modifier = Modifier.widthIn(min = 88.dp),
                                 selected = activity.screen == title,
@@ -73,17 +73,17 @@ fun DevToolsUI(activity: MainActivity) {
                                     Icon(
                                         when (title) {
                                             "Browser" -> Icons.Default.Language
-                                            "Browsers" -> Icons.Default.Public
+                                            "Browsers" -> Icons.Default.Tune
                                             "Plugins" -> Icons.Default.Extension
-                                            "Resources" -> Icons.Default.Folder
+                                            "Resources" -> Icons.Default.Download
                                             "Tools" -> Icons.Default.Build
                                             "Pro" -> Icons.Default.Star
                                             else -> Icons.Default.Settings
                                         },
-                                        contentDescription = title,
+                                        contentDescription = AppNavigation.label(title),
                                     )
                                 },
-                                label = { Text(title) },
+                                label = { Text(AppNavigation.label(title), maxLines = 2) },
                             )
                         }
                         }
@@ -407,6 +407,7 @@ private fun BrowserScreen(activity: MainActivity) {
 private fun BrowserProfilesScreen(activity: MainActivity) {
     var selected by remember { mutableStateOf(0) }
     Column {
+        Text("Browser settings", Modifier.padding(horizontal = 20.dp, vertical = 12.dp), style = MaterialTheme.typography.headlineMedium)
         TabRow(selectedTabIndex = selected) {
             listOf("DevTools", "Firefox").forEachIndexed { index, title ->
                 Tab(selected = selected == index, onClick = { selected = index }, text = { Text(title) })
@@ -958,6 +959,8 @@ private fun SettingsScreen(activity: MainActivity) {
     var reset by remember { mutableStateOf(false) }
     var licenses by remember { mutableStateOf(false) }
     var clearData by remember { mutableStateOf(false) }
+    val console = config.data.getJSONObject("console")
+    var entryColor by remember(console.optString("entryColor")) { mutableStateOf(console.optString("entryColor")) }
     Page("Settings", "Your developer console, your browsing rules.") {
         config.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         Panel {
@@ -981,9 +984,48 @@ private fun SettingsScreen(activity: MainActivity) {
             }
         }
         Panel {
+            Text("Console appearance", style = MaterialTheme.typography.titleMedium)
+            Toggle("Wrap console and source text", checked = console.optBoolean("wrapText", true)) { value ->
+                config.changeConsoleUI("wrapText", value)
+                activity.changed()
+            }
+            Text("The global preference applies on console initialization. Eruda's Wrap text switch changes the current page.")
+            Text("Floating console button", style = MaterialTheme.typography.titleSmall)
+            Text("Default: the app's blue/purple gradient. Choose a preset or enter a custom RGB hex color.")
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf("#3B82F6", "#8B5CF6", "#EC4899", "#10B981", "#F59E0B").forEach { value ->
+                    FilterChip(selected = console.optString("entryColor").equals(value, true), onClick = {
+                        config.changeConsoleUI("entryColor", value); activity.changed()
+                    }, label = { Text(value, color = Color(android.graphics.Color.parseColor(value))) })
+                }
+            }
+            OutlinedTextField(entryColor, { entryColor = it.take(7) }, label = { Text("Custom color (#RRGGBB)") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+            Row {
+                TextButton(enabled = Regex("#[0-9a-fA-F]{6}").matches(entryColor), onClick = {
+                    config.changeConsoleUI("entryColor", entryColor.uppercase()); activity.changed()
+                }) { Text("Apply color") }
+                TextButton(onClick = {config.changeConsoleUI("entryColor", ""); activity.changed()}) { Text("Use app colors") }
+            }
+        }
+        Panel {
+            Text("Bottom navigation", style = MaterialTheme.typography.titleMedium)
+            Text("Show the tabs you use and move them into your preferred order. Settings stays available so you can restore hidden tabs.")
+            val order = AppNavigation.order(config.data)
+            val visible = AppNavigation.visible(config.data)
+            order.forEachIndexed { index, id ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(AppNavigation.label(id), Modifier.weight(1f))
+                    IconButton(enabled = index > 0, onClick = {config.change {AppNavigation.move(it, id, -1)}}) {Icon(Icons.Default.ArrowUpward, "Move ${AppNavigation.label(id)} earlier")}
+                    IconButton(enabled = index < order.lastIndex, onClick = {config.change {AppNavigation.move(it, id, 1)}}) {Icon(Icons.Default.ArrowDownward, "Move ${AppNavigation.label(id)} later")}
+                    Switch(checked = id in visible, enabled = id != "Settings", onCheckedChange = {show -> config.change {AppNavigation.show(it, id, show)}})
+                }
+            }
+            TextButton(onClick = {config.change {it.remove("navigationOrder"); it.remove("hiddenTabs")}}) {Text("Restore default tabs")}
+        }
+        Panel {
             Text("Browser privacy", style = MaterialTheme.typography.titleMedium)
             Text(
-                "Pages have no native JavaScript bridge. Third-party cookies and camera/microphone requests are disabled. TLS errors cancel navigation. HTTP pages are allowed for local development."
+                "Pages have no unrestricted native JavaScript interface. Third-party cookies are disabled. Camera and microphone require website and Android permission. TLS errors cancel navigation. HTTP pages are allowed for local development."
             )
             Text(
                 "Sharing from Chrome opens a separate session here; Chrome's cookies and live page state are not transferred."
@@ -1075,7 +1117,7 @@ private fun SettingsScreen(activity: MainActivity) {
     }
     if (licenses) {
         val text = remember {
-            activity.assets.open("THIRD-PARTY-NOTICES.txt").bufferedReader().use { it.readText() } + "\n\n" + activity.assets.open("editor/THIRD-PARTY-NOTICES.txt").bufferedReader().use { it.readText() }
+            activity.assets.open("THIRD-PARTY-NOTICES.txt").bufferedReader().use { it.readText() } + "\n\n" + activity.assets.open("editor/THIRD-PARTY-NOTICES.txt").bufferedReader().use { it.readText() } + "\n\n" + activity.assets.open("tools/SOURCE-FORMATTING-NOTICES.txt").bufferedReader().use { it.readText() }
         }
         AlertDialog(
             onDismissRequest = { licenses = false },

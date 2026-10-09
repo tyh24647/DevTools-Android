@@ -48,8 +48,8 @@
         if(!root || !entries.size)return;
         let section=root.querySelector("[data-devtools-videos]");
         if(!section) {
-            section=document.createElement("section");section.dataset.devtoolsVideos="";section.style.cssText="padding:12px;display:grid;gap:8px";
-            const heading=document.createElement("h2");heading.textContent="Page media";
+            section=document.createElement("section");section.dataset.devtoolsVideos="";section.style.cssText="padding:12px;display:grid;gap:8px;background:transparent";
+            const heading=document.createElement("h2");heading.textContent="Video and audio";
             section.append(heading);
             const images=root.querySelector(".eruda-image");
             if(images)root.insertBefore(section,images);else root.append(section);
@@ -59,13 +59,16 @@
             image.dataset.devtoolsSave="";
             image.addEventListener("click",event=>{const url=normalized(image.currentSrc||image.src);if(url){event.preventDefault();event.stopImmediatePropagation();add(url,true,false,"image/unknown");preview(url);}},{capture:true});
         }
-        for(const [url,entry] of entries) {
+        const playable=[...entries].filter(([url])=>mediaType(url)!=="img");
+        section.hidden=playable.length===0;
+        for(const row of section.querySelectorAll("[data-media-url]"))if(mediaType(row.dataset.mediaUrl)==="img" || !entries.has(row.dataset.mediaUrl))row.remove();
+        for(const [url,entry] of playable) {
             let row=[...section.querySelectorAll("[data-media-url]")].find(node=>node.dataset.mediaUrl===url);
             if(!row) {
                 row=document.createElement("div");row.dataset.mediaUrl=url;
-                const button=document.createElement("button");button.style.cssText="min-height:44px;max-width:100%;overflow-wrap:anywhere";button.onclick=()=>preview(url);
+                const button=document.createElement("button");button.style.cssText="min-height:44px;max-width:100%;overflow-wrap:anywhere;background:transparent;border:0;padding:0;color:inherit;text-align:left";button.onclick=()=>preview(url);
                 const video=document.createElement(mediaType(url));if(video.tagName!=="IMG")video.preload="metadata";video.width=160;video.height=90;if(video.tagName==="IMG")video.alt="Image resource";
-                video.style.cssText="display:block;width:160px;height:90px;object-fit:contain";video.src=url;
+                video.style.cssText="display:block;width:160px;height:90px;object-fit:contain;background:transparent";video.src=url;
                 const label=document.createElement("span");button.append(video,label);
                 row.append(button);section.append(row);
             }

@@ -21,7 +21,7 @@ export async function runCommand(api, tabId, command, profile = null, decision =
     if (!["show", "auto"].includes(command) && !context.loaded) return { active: false };
     if (!context.loaded) {
         await execute({ func: (url) => { globalThis.__DTExpectedURL = url; }, args: [context.url] });
-        await execute({ files: ["tools/eruda.js", "tools/rule-engine.js", "tools/resource-timing.js", "tools/page-runtime.js"] });
+        await execute({ files: ["tools/eruda.js", "tools/rule-engine.js", "tools/resource-timing.js", "tools/source-formatting.js", "tools/page-runtime.js"] });
     }
     return execute({ func: async (action, expectedURL, settings, matched) => {
         if (location.href !== expectedURL) throw new Error("The page changed. Open DevTools again.");
@@ -33,6 +33,7 @@ export async function runCommand(api, tabId, command, profile = null, decision =
             enabled: settings?.enabled ?? true, runEverywhere: settings?.runEverywhere ?? true, lists: settings?.lists ?? [], pro: true,
             console: { backend: "eruda", displaySize: 55, transparency: 0.98,
                 theme: "Material Palenight", rememberPosition: true,
+                wrapText: settings?.console?.wrapText !== false, entryColor: settings?.console?.entryColor || "",
                 resourceTiming: true, vue: false, code: false, dom: false,
                 timing: false, fps: false, features: false }
         };

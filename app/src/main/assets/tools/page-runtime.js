@@ -22,8 +22,10 @@
         resources: { hideErudaSetting: false, observeElement: true },
         sources: { showLineNum: true, formatCode: true, indentSize: 4 }
     };
-    const state = { eruda: null, vconsole: null, signature: "", hidden: false, warnings: [] };
+    const state = { eruda: null, vconsole: null, signature: "", hidden: false, warnings: [], uiCleanup: null };
     function stop() {
+        state.uiCleanup?.();
+        state.uiCleanup = null;
         try {
             state.eruda?.destroy();
         } catch (error) {
@@ -112,7 +114,7 @@
         const options = config.console || {};
         const pro = !!config.pro;
         const plugins = (config.plugins || []).filter(plugin => plugin.enabled && plugin.kind !== "userscript");
-        const signature = JSON.stringify({ options: pro ? options : {}, pro, plugins });
+        const signature = JSON.stringify({ options: pro ? options : {wrapText: options.wrapText, entryColor: options.entryColor}, pro, plugins });
         if (state.signature !== signature) {
             stop();
             state.warnings = [];
@@ -210,6 +212,10 @@
                         "DevTools defaults are active. Unlock Pro in the DevTools app for customization and extra plugins."
                     );
                 }
+            }
+            if (state.eruda) {
+                globalThis.__DTSourceFormatting?.(state.eruda);
+                state.uiCleanup = globalThis.__DTConsoleUI?.(state.eruda, options);
             }
             state.signature = signature;
         }

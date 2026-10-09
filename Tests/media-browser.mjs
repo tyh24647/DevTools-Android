@@ -27,7 +27,10 @@ try {
  await page.locator('[data-media-url="https://fixture.test/vod.m3u8"] button').click();
  assert.equal(await page.locator('dialog[open] video').count(),1);
  await page.getByRole('button',{name:'Close',exact:true}).click();
- await page.locator('[data-media-url="https://fixture.test/photo.png"] button').click();
+ assert.equal(await page.locator('[data-devtools-videos] img').count(),0);
+ assert.equal(await page.locator('[data-media-url="https://fixture.test/photo.png"]').count(),0);
+ assert.equal(await page.locator('[data-media-url="https://fixture.test/vod.m3u8"] button').evaluate(el=>getComputedStyle(el).backgroundColor),'rgba(0, 0, 0, 0)');
+ await page.locator('#eruda .eruda-image img').click();
  assert.equal(await page.locator('dialog[open] img').count(),1);
  assert.equal(await page.locator('dialog[open] video').count(),0);
  assert.equal(await page.locator('[data-media-url="https://fixture.test/photo.png"] video').count(),0);

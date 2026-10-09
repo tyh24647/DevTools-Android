@@ -1,0 +1,38 @@
+import {chromium} from 'playwright';
+import assert from 'node:assert/strict';
+const browser=await chromium.launch({headless:true});
+try{
+ const page=await browser.newPage({viewport:{width:412,height:915},hasTouch:true});
+ await page.route('https://ui.test/**',r=>r.fulfill({contentType:'text/html',body:'<!doctype html><h1>Console UI fixture</h1>'}));
+ await page.goto('https://ui.test/');
+ await page.evaluate(()=>{globalThis.__DTExpectedURL=location.href});
+ for(const file of ['eruda.js','source-formatting.js','page-runtime.js'])await page.addScriptTag({path:'FirefoxExtension/tools/'+file});
+ await page.evaluate(()=>__DevToolsRuntime.apply({pro:false,console:{}},{run:true},'show'));
+ const root=page.locator('#eruda');
+ assert.ok(await root.locator('.eruda-entry-btn').evaluate(el=>getComputedStyle(el).backgroundImage.includes('linear-gradient')));
+ assert.equal(await root.locator('.dt-resize-grip').count(),1);
+ const grip=root.getByRole('button',{name:'Resize developer console'});
+ const box=await grip.boundingBox();assert.ok(box);
+ const before=await page.evaluate(()=>__DTAssets.eruda.get().config.get('displaySize'));
+ await page.mouse.move(box.x+box.width/2,box.y+box.height/2);
+ await page.mouse.down();await page.mouse.move(box.x+box.width/2,box.y-150,{steps:8});await page.mouse.up();
+ const after=await page.evaluate(()=>__DTAssets.eruda.get().config.get('displaySize'));
+ assert.ok(after>before+10,`Drag should enlarge panel (${before} -> ${after})`);
+ await grip.focus();await page.keyboard.press('ArrowDown');
+ assert.ok(await page.evaluate(()=>__DTAssets.eruda.get().config.get('displaySize'))<after);
+ await page.evaluate(()=>{__DTAssets.eruda.get('sources').set('js','const longText="'+ 'x'.repeat(300)+'";');__DTAssets.eruda.show('sources');});
+ await page.waitForFunction(()=>!__DTAssets.eruda.get('sources')._isGettingHtml);
+ await page.evaluate(()=>__DTAssets.eruda.get('sources').set('js','const longText="'+ 'x'.repeat(300)+'";'));
+ assert.equal(await root.locator('.luna-text-viewer-text').evaluate(el=>getComputedStyle(el).whiteSpace),'pre-wrap');
+ await page.evaluate(()=>__DTAssets.eruda.get().config.set('wrapText',false));
+ assert.equal(await root.locator('.luna-text-viewer-text').evaluate(el=>getComputedStyle(el).whiteSpace),'pre');
+ await page.evaluate(()=>__DTAssets.eruda.show('settings'));
+ assert.ok(await root.getByText('Wrap text',{exact:true}).count());
+ assert.ok(await root.getByText('Beautify source code',{exact:true}).count());
+ await page.evaluate(()=>__DevToolsRuntime.apply({pro:false,console:{entryColor:'#10B981',wrapText:false}},{run:true},'show'));
+ assert.equal(await root.locator('.eruda-entry-btn').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(16, 185, 129)');
+ assert.equal(await root.locator('.dt-resize-grip').count(),1);
+ await page.evaluate(()=>__DevToolsRuntime.stop());
+ assert.equal(await page.locator('.dt-resize-grip').count(),0);
+ console.log('PASS: brand/custom entry color, pointer and keyboard resizing, source wrapping, free settings controls and clean teardown.');
+}finally{await browser.close();}

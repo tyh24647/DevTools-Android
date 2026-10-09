@@ -9,7 +9,7 @@ export function validateProfile(value) {
 }
 export function parsePairingCode(code) {
     const match = /^18746\.([A-Za-z0-9_-]{43})$/.exec(code.trim());
-    if (!match) throw new Error('Copy the pairing code from DevTools → Browsers → Firefox.');
+    if (!match) throw new Error('Copy the pairing code from DevTools → Browser settings → Firefox.');
     return match[1];
 }
 export async function syncSettings(api, fetcher = fetch) {

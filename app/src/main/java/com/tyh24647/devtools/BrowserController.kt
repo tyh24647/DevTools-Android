@@ -480,6 +480,7 @@ class BrowserController(
         val userPrefix = "if(window.top===window && /^https?:$/.test(location.protocol)) {\n" + userscriptSource +
             "\n__DTUserscripts.start(" + org.json.JSONArray(userscripts).toString() + ");\n}\n"
         val assets =
+            activity.assets.open("tools/source-formatting.js").bufferedReader().use { it.readText() } + "\n" +
             mediaSource + "\n" + ids.joinToString("\n") { packages.source(it) } +
                 "\n" +
                 activity.assets.open("tools/resource-timing.js").bufferedReader().use {

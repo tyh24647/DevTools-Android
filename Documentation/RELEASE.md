@@ -1,6 +1,6 @@
 # Android release setup
 
-- Open this project in Android Studio. Compile/target SDK 36, min SDK 26, JDK 17, AGP 8.13, Gradle 8.13, Kotlin/Compose compiler 2.2.10.
+- Open this project in Android Studio. Compile/target SDK 36, min SDK 26, compatible Android Studio bundled JDK (Java compilation target 17), AGP 9.4.1, Gradle 9.6.0, Kotlin/Compose compiler 2.2.10.
 - The release package is com.tyh24647.devtools. Register it in Play Console, configure app signing and generate a signed AAB using Android Studio's Build → Generate Signed App Bundle / APK flow. Release source defaults have no Pro preview entitlement. The delivered APK is for debug testing, not store distribution.
 - Create devtools_pro_monthly (monthly subscription base plan) at your intended $2.99 US price and devtools_pro_lifetime (one-time, non-consumable) at $19.99. Add your licensing public key as described in gradle.properties.example. Publish an internal testing build and configure license testers. Test successful, pending, cancelled, expired, revoked, already-owned and restored purchases.
 - Local RSA verification is implemented, but a production verification server with Play Developer API checks and real-time developer notifications should enforce current entitlement state and resist token replay. Acknowledgement, refresh and restore need real Play-track testing.

@@ -54,7 +54,7 @@ fun ResourcesScreen(activity:MainActivity) {
     LazyVerticalGrid(columns=GridCells.Adaptive(150.dp),modifier=Modifier.fillMaxSize(),contentPadding=PaddingValues(16.dp),horizontalArrangement=Arrangement.spacedBy(12.dp),verticalArrangement=Arrangement.spacedBy(12.dp)) {
       item(span={GridItemSpan(maxLineSpan)}) {Column(verticalArrangement=Arrangement.spacedBy(10.dp)) {
         Row(verticalAlignment=Alignment.CenterVertically) {
-            Text("Saved resources",Modifier.weight(1f),style=MaterialTheme.typography.headlineMedium)
+            Text("Downloads",Modifier.weight(1f),style=MaterialTheme.typography.headlineMedium)
             IconButton(onClick={options=true}){Icon(Icons.Default.Settings,"Media settings")}
         }
         if(library.tasks.any{!it.done})Text("Active transfers",style=MaterialTheme.typography.titleLarge)

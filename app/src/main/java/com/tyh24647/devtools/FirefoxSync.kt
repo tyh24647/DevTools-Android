@@ -119,6 +119,7 @@ class FirefoxSync(private val activity: Activity, private val config: Configurat
             .put("enabled", profile.optBoolean("enabled", true))
             .put("runEverywhere", profile.optBoolean("runEverywhere", true))
             .put("lists", profile.getJSONArray("lists"))
+            .put("console", JSONObject().put("wrapText", config.data.getJSONObject("console").optBoolean("wrapText", true)).put("entryColor", config.data.getJSONObject("console").optString("entryColor", "")))
     }
 
     private fun respond(socket: Socket, status: Int, body: JSONObject) {

@@ -128,6 +128,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         configuration = Configuration(this)
+        if (screen !in AppNavigation.visible(configuration.data)) screen = AppNavigation.visible(configuration.data).first()
         val editorPrefs=getSharedPreferences("bundled-plugins",0)
         if(!editorPrefs.getBoolean("css-installed",false)) {
             runCatching {
