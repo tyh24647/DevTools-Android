@@ -1,0 +1,43 @@
+{
+    "name": "devtools-android-assets",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "test": "node --test Tests/*.test.mjs",
+        "test:browser": "node Tests/android-browser.mjs",
+        "vendor": "node Scripts/vendor.mjs && node Scripts/sync-assets.mjs",
+        "update:tools": "npm install --save-exact --ignore-scripts eruda@latest eruda-vue@latest eruda-vue-devtools@latest vconsole@latest vue-vconsole-devtools@latest eruda-code@latest eruda-dom@latest eruda-timing@latest eruda-fps@latest eruda-features@latest && npm run vendor",
+        "build:firefox": "node Scripts/build-firefox.mjs",
+        "test:firefox-browser": "node Tests/firefox-browser.mjs",
+        "test:media-browser": "node Tests/media-browser.mjs",
+        "test:editor-browser": "node Tests/editor-browser.mjs",
+        "test:css-browser": "node Tests/css-editor-browser.mjs",
+        "build:editor": "node Scripts/build-editor.mjs"
+    },
+    "dependencies": {
+        "@codemirror/autocomplete": "6.20.3",
+        "@codemirror/lang-javascript": "6.2.5",
+        "@codemirror/language": "6.13.1",
+        "@codemirror/state": "6.7.6",
+        "@codemirror/theme-one-dark": "6.1.3",
+        "@codemirror/view": "6.43.14",
+        "acorn": "8.19.0",
+        "codemirror": "6.0.2",
+        "eruda": "3.4.3",
+        "eruda-code": "2.2.0",
+        "eruda-dom": "2.0.0",
+        "eruda-features": "2.1.0",
+        "eruda-fps": "2.0.0",
+        "eruda-timing": "2.0.1",
+        "eruda-vue": "1.1.1",
+        "eruda-vue-devtools": "1.0.1",
+        "vconsole": "3.15.1",
+        "vue-vconsole-devtools": "1.0.9"
+    },
+    "devDependencies": {
+        "@playwright/test": "1.63.0",
+        "esbuild": "0.28.2",
+        "prettier": "3.9.9"
+    }
+}

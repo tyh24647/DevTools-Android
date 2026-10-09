@@ -1,0 +1,105 @@
+{
+  "generatedAt": "2026-09-30T11:44:06.450Z",
+  "assets": [
+    {
+      "id": "eruda",
+      "package": "eruda",
+      "version": "3.4.3",
+      "path": "eruda.js",
+      "file": "vendor/eruda.js",
+      "global": "eruda",
+      "sha256": "My+VsUsdxTzb5gQuDqlaxgJaxpHChdUbZHxkNg/pOeI=",
+      "license": "MIT"
+    },
+    {
+      "id": "vue",
+      "package": "eruda-vue",
+      "version": "1.1.1",
+      "path": "eruda-vue.js",
+      "file": "vendor/vue.js",
+      "global": "erudaVue",
+      "sha256": "g+bhzuRgspyirtUKOArpii2usnnfkVeTxem64+gzvSs=",
+      "license": "MIT"
+    },
+    {
+      "id": "vueLegacy",
+      "package": "eruda-vue-devtools",
+      "version": "1.0.1",
+      "path": "dist/eruda_vue_devtools.js",
+      "file": "vendor/vueLegacy.js",
+      "global": "eruda_vue_devtools",
+      "sha256": "b4tOxzK53JWuRr7xX7U2j+MqsElXDUFdXl3iwbemG0U=",
+      "license": "MIT"
+    },
+    {
+      "id": "vconsole",
+      "package": "vconsole",
+      "version": "3.15.1",
+      "path": "dist/vconsole.min.js",
+      "file": "vendor/vconsole.js",
+      "global": "VConsole",
+      "sha256": "NBiF69Hbn1eFFOhieaRJwKaYvogm2UlBgI1rVWKD6hY=",
+      "license": "MIT"
+    },
+    {
+      "id": "vueVConsole",
+      "package": "vue-vconsole-devtools",
+      "version": "1.0.9",
+      "path": "dist/vue_plugin.js",
+      "file": "vendor/vueVConsole.js",
+      "global": "vueVconsoleDevtools",
+      "sha256": "DcdSanlKSnCmrH0NpJRTxEbge/DRJlSghjoVeMW0uxw=",
+      "license": "MIT"
+    },
+    {
+      "id": "code",
+      "package": "eruda-code",
+      "version": "2.2.0",
+      "path": "eruda-code.js",
+      "file": "vendor/code.js",
+      "global": "erudaCode",
+      "sha256": "uMcEeS/tEfEMvH9/BcNH33BYtLBtdj9yds/O9O/q5V4=",
+      "license": "MIT"
+    },
+    {
+      "id": "dom",
+      "package": "eruda-dom",
+      "version": "2.0.0",
+      "path": "eruda-dom.js",
+      "file": "vendor/dom.js",
+      "global": "erudaDom",
+      "sha256": "DdWLxwc+aJ8ZtsyROOZCVm/n5BN098LqmOjRBYe6ThQ=",
+      "license": "MIT"
+    },
+    {
+      "id": "timing",
+      "package": "eruda-timing",
+      "version": "2.0.1",
+      "path": "eruda-timing.js",
+      "file": "vendor/timing.js",
+      "global": "erudaTiming",
+      "sha256": "/JUjPQjSq19wH8wuV7Th/pqDzdT+Wn+q8YZz8Wq8vdM=",
+      "license": "MIT"
+    },
+    {
+      "id": "fps",
+      "package": "eruda-fps",
+      "version": "2.0.0",
+      "path": "eruda-fps.min.js",
+      "file": "vendor/fps.js",
+      "global": "erudaFps",
+      "sha256": "MIYunCyzzPoj3jWUnlw2kv9DPGQL+Ocrwsx7jGG68JU=",
+      "license": "MIT"
+    },
+    {
+      "id": "features",
+      "package": "eruda-features",
+      "version": "2.1.0",
+      "path": "eruda-features.js",
+      "file": "vendor/features.js",
+      "global": "erudaFeatures",
+      "sha256": "lWubwIsIW70zrfKnWMD71zMRgHkvELfIEs79id9ASG0=",
+      "license": "MIT"
+    }
+  ]
+}

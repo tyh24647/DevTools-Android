@@ -1,0 +1,10 @@
+# Copy these properties to ~/.gradle/gradle.properties for your own account.
+# Public licensing key only; never add private signing keys or service-account credentials.
+billingPublicKey=YOUR_PLAY_RSA_PUBLIC_KEY
+# Updated upstream source disables ads by default; change to true to enable.
+devtoolsAds=false
+# Test IDs by default. Substitute your own IDs before production.
+admobAppId=ca-app-pub-3940256099942544~3347511713
+adBanner=ca-app-pub-3940256099942544/6300978111
+adInterstitial=ca-app-pub-3940256099942544/1033173712
+adOpen=ca-app-pub-3940256099942544/9257395921

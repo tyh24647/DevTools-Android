@@ -1,0 +1,19 @@
+.gradle/
+.idea/
+local.properties
+**/build/
+node_modules/
+*.jks
+*.keystore
+
+# Local caches and packaged distributions
+.kotlin/
+.DS_Store
+Build/
+*.apk
+*.aab
+*.xpi
+*.log
+.env
+.env.*
+!.env.example

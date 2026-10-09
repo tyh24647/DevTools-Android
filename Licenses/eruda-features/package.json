@@ -1,0 +1,55 @@
+{
+  "name": "eruda-features",
+  "version": "2.1.0",
+  "main": "eruda-features.js",
+  "description": "Eruda plugin for browser feature detections",
+  "browserslist": [
+    "since 2015",
+    "not dead"
+  ],
+  "files": [
+    "eruda-features.js",
+    "eruda-features.js.map"
+  ],
+  "scripts": {
+    "dev": "webpack-dev-server --host 0.0.0.0 --mode development",
+    "build": "webpack --mode production",
+    "ci": "npm run lint && npm run build && npm run es5",
+    "lint": "eslint src/**/*.js",
+    "format": "lsla prettier \"src/*.{js,scss}\" \"*.json\" --write",
+    "buildModernizr": "node script/buildModernizr",
+    "es5": "es-check es5 eruda-features.js"
+  },
+  "keywords": [
+    "eruda",
+    "features",
+    "plugin"
+  ],
+  "author": "redhoodsu",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/liriliri/eruda-features/issues"
+  },
+  "homepage": "https://github.com/liriliri/eruda-features#readme",
+  "devDependencies": {
+    "@babel/core": "^7.21.3",
+    "@babel/plugin-transform-runtime": "^7.21.0",
+    "@babel/preset-env": "^7.20.2",
+    "autoprefixer": "^10.4.14",
+    "babel-loader": "^9.1.2",
+    "css-loader": "^3.4.2",
+    "eruda": "^3.2.0",
+    "es-check": "^7.2.1",
+    "eslint": "^8.57.0",
+    "licia": "^1.41.1",
+    "modernizr": "^3.13.0",
+    "postcss": "^8.4.21",
+    "postcss-class-prefix": "^0.3.0",
+    "postcss-loader": "^7.0.2",
+    "sass": "^1.77.8",
+    "sass-loader": "^14.2.1",
+    "webpack": "^5.93.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.12.0"
+  }
+}

@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">⚙︎ DevTools</string>
+    <string name="add_block">⚙︎ DevTools - Add to Blacklist</string>
+    <string name="add_allow">⚙︎ DevTools - Add to AllowList</string>
+    <string name="show">⚙︎ DevTools - Show</string>
+    <string name="hide">⚙︎ DevTools - Hide</string>
+    <string name="enable">⚙︎ DevTools - Enable</string>
+    <string name="disable">⚙︎ DevTools - Disable</string>
+</resources>

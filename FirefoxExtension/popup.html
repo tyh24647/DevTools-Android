@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DevTools · Firefox</title>
+  <link rel="stylesheet" href="popup.css">
+  <script type="module" src="popup.js"></script>
+</head>
+<body><main>
+  <h1>Firefox settings</h1>
+  <fieldset id="settings" disabled>
+    <legend>Run DevTools</legend>
+    <label class="toggle"><input type="checkbox" id="enabled" name="enabled"> DevTools enabled</label>
+    <label class="toggle"><input type="checkbox" id="runEverywhere" name="runEverywhere" aria-describedby="rules-help"> Run on every webpage</label>
+    <p id="rules-help">When off, only selected AllowLists run. Blacklists always take priority.</p>
+  </fieldset>
+  <p id="lists">Manage Firefox lists in DevTools → Browsers → Firefox.</p>
+  <div class="controls">
+    <button type="button" data-command="show">Show console</button>
+    <button type="button" data-command="hide">Hide console</button>
+    <button type="button" data-command="stop">Stop on this page</button>
+    <button type="button" id="sync">Sync with app</button>
+  </div>
+  <p id="status" role="status" aria-live="polite">Loading Firefox settings…</p>
+  <details><summary>Pair with DevTools app</summary>
+    <p id="pair-help">In DevTools → Browsers → Firefox, copy the pairing code. Keep the app running to sync.</p>
+    <form id="pair-form">
+      <label for="pair-code">Pairing code</label>
+      <input type="password" id="pair-code" name="pairCode" required maxlength="60" autocapitalize="off" spellcheck="false" aria-describedby="pair-help">
+      <button type="submit">Pair and sync</button>
+    </form>
+  </details>
+  <small>Firefox’s internal pages and Mozilla-protected sites cannot be inspected.</small>
+</main></body></html>
