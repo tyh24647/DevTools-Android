@@ -22,12 +22,17 @@ try {
  await page.evaluate(()=>__DTAssets.eruda.get('sources').config.set('formatCode',false));
  assert.equal(await page.evaluate(()=>__DTAssets.eruda.get('sources')._$el.get(0).innerText.includes('    const label')),false);
  await page.evaluate(()=>__DTAssets.eruda.get('sources').config.set('formatCode',true));
+ await page.waitForFunction(()=>__DTAssets.eruda.get('sources')._$el.get(0).innerText.includes('    const label'));
  assert.ok(await page.evaluate(()=>__DTAssets.eruda.get('sources')._$el.get(0).innerText.includes('    const label')));
  for(const [type,code] of [['css','body{color:red;background:black}'],['html','<html><body><div><span>Text</span></div></body></html>']]){
   await page.evaluate(({type,code})=>__DTAssets.eruda.get('sources').set(type,code),{type,code});
+  await page.waitForFunction(()=>__DTAssets.eruda.get('sources')._$el.get(0).innerText.includes('\n'));
   assert.ok(await page.evaluate(()=>__DTAssets.eruda.get('sources')._$el.get(0).innerText.includes('\n')));
  }
  await page.evaluate(async config=>{await __DevToolsRuntime.apply(config,{run:false});await __DevToolsRuntime.apply(config,{run:true},'show');__DTAssets.eruda.show('sources');__DTAssets.eruda.get('sources').set('js','function again(){return 1;}');},config);
+ await page.waitForFunction(()=>!__DTAssets.eruda.get('sources')._isGettingHtml);
+ await page.evaluate(()=>__DTAssets.eruda.get('sources').set('js','function again(){return 1;}'));
+ await page.waitForFunction(()=>__DTAssets.eruda.get('sources')._$el.get(0).innerText.includes('\n'));
  assert.ok(await page.evaluate(()=>__DTAssets.eruda.get('sources')._$el.get(0).innerText.includes('\n')));
  console.log('PASS: actual Eruda Sources expands JS/CSS/HTML, preserves original source, toggles formatting, survives restart and never executes displayed source.');
 }finally{await browser.close();}

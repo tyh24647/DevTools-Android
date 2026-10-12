@@ -25,6 +25,8 @@ fun ScriptEditor(activity:MainActivity,initial:String,kind:String,onChange:(Stri
         if(!has("closeBrackets"))put("closeBrackets",true)
         if(!has("wrap"))put("wrap",true)
     })}
+    val fontOptions = CodeFonts.options(activity)
+    fontOptions.keys().forEach { key -> options.put(key, fontOptions.get(key)) }
     var settings by remember {mutableStateOf(false)}
     var generation by remember {mutableStateOf(0)}
     var lastSource by remember {mutableStateOf(initial)}
@@ -72,7 +74,7 @@ fun ScriptEditor(activity:MainActivity,initial:String,kind:String,onChange:(Stri
     if(settings)AlertDialog(onDismissRequest={settings=false},title={Text("Editor settings")},text={Column(Modifier.verticalScroll(rememberScrollState())){
         Text("Theme")
         FlowRow {listOf("light","dark").forEach {theme->FilterChip(options.optString("theme")==theme,{option("theme",theme)},label={Text(theme)})}}
-        listOf("invisibles" to "Show invisible characters","matchBrackets" to "Highlight matching brackets","closeBrackets" to "Automatically close brackets","wrap" to "Wrap long lines","singleQuote" to "Format with single quotes","semicolons" to "Format with semicolons").forEach {(key,label)->Row{Text(label,Modifier.weight(1f));Switch(options.optBoolean(key,key=="semicolons"),{option(key,it)})}}
+        listOf("invisibles" to "Show invisible characters","matchBrackets" to "Highlight matching brackets","closeBrackets" to "Automatically close brackets","wrap" to "Wrap long lines","singleQuote" to "Format with single quotes","semicolons" to "Format with semicolons").forEach {(key,label)->Row{Text(label,Modifier.weight(1f));DevToolsSwitch(options.optBoolean(key,key=="semicolons"),{option(key,it)})}}
         Text("Indentation")
         FlowRow {listOf("spaces","tabs").forEach {value->FilterChip(options.optString("indent","spaces")==value,{option("indent",value)},label={Text(value)})};listOf(2,4).forEach {size->FilterChip(options.optInt("indentSize",2)==size,{option("indentSize",size)},label={Text(size.toString())})}}
         Text("Font size")

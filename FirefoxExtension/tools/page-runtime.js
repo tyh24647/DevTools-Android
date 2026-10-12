@@ -114,7 +114,7 @@
         const options = config.console || {};
         const pro = !!config.pro;
         const plugins = (config.plugins || []).filter(plugin => plugin.enabled && plugin.kind !== "userscript");
-        const signature = JSON.stringify({ options: pro ? options : {wrapText: options.wrapText, entryColor: options.entryColor}, pro, plugins });
+        const signature = JSON.stringify({ options: pro ? options : {wrapText: options.wrapText, entryColor: options.entryColor,codeFont:options.codeFont,codeFontData:options.codeFontData}, pro, plugins });
         if (state.signature !== signature) {
             stop();
             state.warnings = [];
@@ -139,6 +139,13 @@
                 state.eruda = assets.eruda;
                 // eruda-fps 2.0.0 still expects the pre-3.x now helper.
                 state.eruda.util.now ||= Date.now;
+                // eruda-dom 2.0.0 uses utilities removed from Eruda 3's slim bundle.
+                state.eruda.util.toArr ||= value => Array.from(value);
+                state.eruda.util.$ ||= value => {const Wrapper=state.eruda.get()._$el.constructor;return new Wrapper(value);};
+                state.eruda.util.each ||= (value, visit) => {
+                    if (typeof value?.length === "number") Array.from(value).forEach((item,index)=>visit(item,index,value));
+                    else if (value) Object.keys(value).forEach(key=>visit(value[key],key,value));
+                };
                 state.eruda.init({
                     useShadowDom: true,
                     defaults: pro
@@ -165,6 +172,8 @@
                             : values
                     );
                 }
+                const elements = state.eruda.get("elements");
+                if (elements && !elements.set) elements.set = node => elements.select(node);
                 configSet(state.eruda.get("entryBtn")?.config, {
                     rememberPos: pro ? options.rememberPosition : true
                 });
@@ -199,8 +208,11 @@
             }
             if (state.eruda) {
                 globalThis.__DTSourceFormatting?.(state.eruda);
+                if (options.cssEditor !== false && globalThis.__DTCSSPlugin) add("css-editor", globalThis.__DTCSSPlugin);
                 state.uiCleanup = globalThis.__DTConsoleUI?.(state.eruda, options);
             }
+            state.eruda?.get().config.set("displaySize", Math.max(25, Math.min(85, Number(options.displaySize) || 55)));
+            state.eruda?.get().showTool?.("console");
             state.signature = signature;
         }
         if (command === "hide") {
@@ -212,6 +224,7 @@
         } else if (command === "show") {
             state.hidden = false;
             state.eruda?.get("entryBtn")?.show();
+            state.eruda?.show("console");
             state.eruda?.show();
             state.vconsole?.showSwitch();
             state.vconsole?.show();

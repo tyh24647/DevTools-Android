@@ -40,3 +40,13 @@ document.querySelector('#pair-form').addEventListener('submit',event=>{
     });
 });
 perform(async()=>display(await browser.runtime.sendMessage({type:'get-settings'})));
+
+const mediaToggle=document.querySelector('#media-connected');
+const cookieToggle=document.querySelector('#media-cookies');
+browser.storage.local.get(['mediaConnected','includeMediaCookies']).then(value=>{mediaToggle.checked=!!value.mediaConnected;cookieToggle.checked=!!value.includeMediaCookies;});
+mediaToggle.addEventListener('change',()=>perform(async()=>{status.textContent=(await browser.runtime.sendMessage({type:'connect-media',enabled:mediaToggle.checked})).status;}));
+cookieToggle.addEventListener('change',async()=>{
+    try {if(cookieToggle.checked && !await browser.permissions.request({permissions:['cookies']}))cookieToggle.checked=false;await browser.storage.local.set({includeMediaCookies:cookieToggle.checked});}
+    catch(error){cookieToggle.checked=false;status.textContent=error.message;}
+});
+document.querySelector('#scripts').addEventListener('click',()=>browser.tabs.create({url:browser.runtime.getURL('scripts.html')}));

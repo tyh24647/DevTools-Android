@@ -16,7 +16,8 @@
         "build:editor": "node Scripts/build-editor.mjs",
         "build:sources": "node Scripts/build-sources.mjs",
         "test:sources-browser": "node Tests/sources-browser.mjs",
-        "test:console-ui-browser": "node Tests/console-ui-browser.mjs"
+        "test:console-ui-browser": "node Tests/console-ui-browser.mjs",
+        "test:firefox-parity-browser": "node Tests/firefox-parity-browser.mjs"
     },
     "dependencies": {
         "@codemirror/autocomplete": "6.20.3",

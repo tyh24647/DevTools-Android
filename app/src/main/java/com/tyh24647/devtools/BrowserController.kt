@@ -41,6 +41,10 @@ class BrowserTab(val webView: WebView) {
     var script: ScriptHandler? = null
     var pendingCommand = ""
     var restoreURL = ""
+    var pageZoom by mutableStateOf(100)
+    var reader by mutableStateOf(false)
+    var desktop by mutableStateOf(false)
+    val mobileUserAgent = webView.settings.userAgentString
 }
 
 /** Owns WebViews on the UI thread. Media requests use a bounded message listener; saving requires native confirmation. */
@@ -101,6 +105,30 @@ class BrowserController(
         }
     }
 
+    fun blockPopups(enabled: Boolean) {
+        configuration.change { it.put("blockPopups",enabled) }
+        tabs.forEach { it.webView.settings.javaScriptCanOpenWindowsAutomatically = !enabled }
+    }
+    fun desktopMode(enabled: Boolean) { current?.let { tab ->
+        tab.desktop = enabled
+        with(tab.webView.settings) {
+            userAgentString = if(enabled) tab.mobileUserAgent.replace("; wv", "").replace(Regex("Android[^)]*"), "X11; Linux x86_64").replace("Mobile ", "") else tab.mobileUserAgent
+            useWideViewPort = enabled
+            loadWithOverviewMode = enabled
+        }
+        tab.webView.reload()
+    } }
+    fun pageZoom(delta: Int) { current?.let { tab -> tab.pageZoom = if (delta == 0) 100 else (tab.pageZoom + delta).coerceIn(50, 200); applyPageZoom(tab) } }
+    private fun applyPageZoom(tab: BrowserTab) {
+        tab.webView.evaluateJavascript("document.documentElement.style.zoom='" + tab.pageZoom / 100.0 + "'", null)
+    }
+    fun reader() { current?.let { tab ->
+        tab.webView.evaluateJavascript(activity.assets.open("tools/reader.js").bufferedReader().use { it.readText() }) { result ->
+            if (result == "true" || result == "false") tab.reader = result == "true"
+            else notice = "No readable article was found on this page."
+        }
+    } }
+
     @SuppressLint("SetJavaScriptEnabled")
     fun newTab(address: String = "", provided: WebView? = null, loadImmediately: Boolean = true): BrowserTab {
         if (tabs.size >= 12) {
@@ -115,7 +143,7 @@ class BrowserController(
             allowFileAccess = false
             allowContentAccess = false
             mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_NEVER_ALLOW
-            javaScriptCanOpenWindowsAutomatically = false
+            javaScriptCanOpenWindowsAutomatically = !configuration.data.optBoolean("blockPopups", true)
             setSupportMultipleWindows(true)
             builtInZoomControls = true
             displayZoomControls = false
@@ -158,7 +186,8 @@ class BrowserController(
                             val currentID=selected
                             newTab(WebURLs.normalize(address).orEmpty(),loadImmediately=false)
                             if(!wasSelected && tabs.any{it.id==currentID})selected=currentID
-                            persistTabs()
+                            applyPageZoom(tab)
+                    persistTabs()
                         }
                     }
                     return true
@@ -176,9 +205,17 @@ class BrowserController(
                     return false
                 }
 
+                override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): android.webkit.WebResourceResponse? {
+                    if (!request.isForMainFrame && configuration.data.optBoolean("blockAds", false) && BrowserAds.blocked(request.url.host.orEmpty())) {
+                        return android.webkit.WebResourceResponse("text/plain", "UTF-8", java.io.ByteArrayInputStream(byteArrayOf()))
+                    }
+                    return null
+                }
+
                 override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
                     library.leave(tab.id)
                     tab.url = url ?: ""
+                    tab.reader = false
                     activity.webMediaPermissions.leave(view)
                     tab.status = "Loading…"
                 }
@@ -258,7 +295,7 @@ class BrowserController(
                     isUserGesture: Boolean,
                     resultMsg: Message,
                 ): Boolean {
-                    if (!isUserGesture || tabs.size >= 12) {
+                    if (configuration.data.optBoolean("blockPopups", true) || tabs.size >= 12) {
                         return false
                     }
                     val popup = newTab()
@@ -457,6 +494,8 @@ class BrowserController(
 
     private fun buildScript(): String {
         val config = configuration.bridge()
+        val font = CodeFonts.options(activity)
+        font.keys().forEach { key -> config.getJSONObject("console").put(key,font.get(key)) }
         val options = config.getJSONObject("console")
         val ids = mutableListOf("eruda")
         if (config.optBoolean("pro")) {

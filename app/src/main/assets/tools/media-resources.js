@@ -35,7 +35,7 @@
         const status=document.createElement("p");status.textContent=entries.get(url)?.status || "Resource preview";
         const save=document.createElement("button");save.textContent=media.tagName==="VIDEO"?"Save / start recording":"Save resource";save.style.minHeight="44px";save.onclick=()=>{request(url);dialog.close();};
         const share=document.createElement("button");share.textContent="Share";share.style.minHeight="44px";share.onclick=async()=>{
-            try{if(globalThis.devtoolsMedia){message("share",url);return;}if(navigator.share)await navigator.share({title:document.title,url});else {await navigator.clipboard.writeText(url);status.textContent="Link copied.";}}catch(error){status.textContent=error.message;}
+            try{if(globalThis.devtoolsMedia && !globalThis.devtoolsMedia.firefox){message("share",url);return;}if(navigator.share)await navigator.share({title:document.title,url});else {await navigator.clipboard.writeText(url);status.textContent="Link copied.";}}catch(error){status.textContent=error.message;}
         };
         const close=document.createElement("button");close.textContent="Close";close.style.minHeight="44px";close.onclick=()=>dialog.close();
         dialog.append(media,status,save,share,close);document.body.append(dialog);

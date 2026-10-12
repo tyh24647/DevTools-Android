@@ -18,7 +18,7 @@ import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
-data class PageMedia(val url: String, val page: String, val tab: String, val title: String, val hls: Boolean = false, val mime: String = "")
+data class PageMedia(val url: String, val page: String, val tab: String, val title: String, val hls: Boolean = false, val mime: String = "", val cookies: Map<String, String> = emptyMap())
 data class MediaChoice(val variant: HlsVariant?, val audio: String?, val live: Boolean)
 class MediaTask(val media: PageMedia, val choice: MediaChoice, val folder: String, val name: String) {
     val id=UUID.randomUUID().toString()
@@ -113,7 +113,7 @@ class MediaLibrary private constructor(val context: Context) {
         connection.connectTimeout=15000;connection.readTimeout=15000;connection.instanceFollowRedirects=false
         connection.setRequestProperty("User-Agent","Mozilla/5.0 (Android) DevTools/1.0")
         connection.setRequestProperty("Referer",media.page)
-        CookieManager.getInstance().getCookie(url)?.let {connection.setRequestProperty("Cookie",it)}
+        (if(media.tab.startsWith("firefox:"))media.cookies[origin(url)] else CookieManager.getInstance().getCookie(url))?.let {connection.setRequestProperty("Cookie",it)}
         range?.let {connection.setRequestProperty("Range","bytes="+it.offset+"-"+(it.offset+it.length-1))}
         return connection
     }
@@ -256,6 +256,12 @@ class MediaLibrary private constructor(val context: Context) {
         return uri
     }
     companion object {
+        fun origin(url: String): String {
+            val value = java.net.URI(url)
+            val port = if(value.port == -1 || (value.scheme == "https" && value.port == 443) || (value.scheme == "http" && value.port == 80)) "" else ":${value.port}"
+            return "${value.scheme}://${value.host}$port"
+        }
+
         @Volatile private var instance:MediaLibrary?=null
         fun get(context:Context):MediaLibrary=instance?:synchronized(this){instance?:MediaLibrary(context.applicationContext).also {instance=it}}
         fun mime(file:File)=android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(file.extension.lowercase()) ?: "application/octet-stream"

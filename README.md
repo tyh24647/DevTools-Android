@@ -4,7 +4,7 @@ A native Android developer browser with Eruda debugging tools, a Firefox compani
 
 Inspect webpages, run custom plugins and userscripts, apply page CSS, and save images or videos into a local media library.
 
-DevTools defaults to **enabled**, **run on every webpage**, and **automatic tool updates**. Selected blacklists take priority over AllowLists. The app opens on **Browsers**, where the native browser and Firefox have separate settings.
+DevTools defaults to **enabled**, **run on every webpage**, and **automatic tool updates**. Selected blacklists take priority over AllowLists. The app opens on **Browser settings**, where the native browser and Firefox have separate settings.
 
 ## Open and run
 
@@ -13,7 +13,7 @@ DevTools defaults to **enabled**, **run on every webpage**, and **automatic tool
 3. Select **app / debug** and run on Android **8.0 (API 26)** or newer.
 4. Keep Android System WebView updated. Document-start injection is used when supported; older providers fall back to injection after page load.
 5. Open **Browser** and enter a URL, or share a page URL into DevTools.
-6. Use **Browsers** to configure automatic activation, AllowLists, and blacklists.
+6. Use **Browser settings** to configure automatic activation, AllowLists, and blacklists.
 
 ```sh
 ./gradlew :app:assembleDebug
@@ -60,13 +60,13 @@ Android controls their ordering, grouping, and displayed labels. Sharing a URL o
 
 ## Firefox companion
 
-The Firefox preview runs Eruda inside Firefox and pairs with **Browsers → Firefox** in the Android app. Its responsive menu includes Show/Hide and synchronized Enabled/Run on every page toggles. Manage per-browser lists in the app.
+The Firefox preview runs Eruda inside Firefox and pairs with **Browser settings → Firefox** in the Android app. Its responsive menu includes Show/Hide and synchronized Enabled/Run on every page toggles. Manage per-browser lists in the app.
 
 ```sh
 npm run build:firefox
 ```
 
-This creates `Build/DevTools-Firefox-preview.xpi`. Temporary add-ons disappear when Firefox restarts; persistent installation requires Mozilla signing. Firefox internal pages and protected sites remain inaccessible. The companion currently includes Eruda and resource timing; native plugins, userscripts, and the saved-media bridge are not included.
+This creates `Build/DevTools-Firefox-preview.xpi`. Temporary add-ons disappear when Firefox restarts; persistent installation requires Mozilla signing. Firefox internal pages and protected sites remain inaccessible. Version 0.4.0 adds the shared console adapters, source beautification, console resizing, icon colors, wrapping, code fonts, CSS editor, explicitly installed Firefox copies of custom plugins/userscripts, and the authenticated native media bridge. Enable media integration in the add-on, then confirm each save in the app. The new package requires its own Mozilla signing; approval of the previous version does not sign this update.
 
 See [Firefox setup and limitations](FirefoxExtension/README.md) for pairing, installation, permissions, and preview status. Chrome URL sharing opens the native browser; it does not install a Chrome extension.
 
@@ -84,7 +84,7 @@ Up to 20 scripts of 256 KB each can be stored. Scripts run with the inspected pa
 
 ## Saved images, videos, and live streams
 
-**Resources contains only explicitly saved files.** Discovered URLs stay in Eruda. Save from Eruda's media preview, long-press a page image, or use a video's download button.
+**Downloads contains only explicitly saved files.** Discovered URLs stay in Eruda. Save from Eruda's media preview, long-press a page image, or use a video's download button.
 
 The library shows image/video thumbnails, supports folders and hidden-file visibility, and offers previews, sharing, export, and system Files access. Unsupported thumbnail codecs fall back to a file icon. Choose a default app folder and optionally an additional export destination.
 
@@ -146,7 +146,7 @@ npm run test:css-browser
 ./gradlew :app:testDebugUnitTest :app:lintDebug
 ```
 
-Rebuild editor assets with `npm run build:editor`; rebuild the Firefox package with `npm run build:firefox`. Instrumentation tests live in `app/src/androidTest` and require a connected Android device.
+Rebuild editor assets with `npm run build:editor` and source tools with `npm run build:sources`; rebuild the Firefox package with `npm run build:firefox`. Instrumentation tests live in `app/src/androidTest` and require a connected Android device.
 
 ## Structure and boundaries
 
@@ -177,3 +177,9 @@ See [completed checks and remaining device tests](Documentation/TESTING.md).
 - [CodeMirror](https://codemirror.net/)
 - [Prettier](https://prettier.io/)
 - [Mozilla Extension Workshop](https://extensionworkshop.com/)
+
+### Browser appearance and page controls
+
+The app follows system light/dark mode by default, using black dark surfaces, outline navigation icons, and a rounded translucent toolbar. Settings can hide and reorder tabs. The URL field contains a clear button and a left-hand quick menu for desktop/mobile mode, popup blocking, a small bundled ad-host blocker, reader mode, and layout zoom (50–200%). Reader mode supports article/main content; fixed-layout sites can still overflow when zoomed. Code-font settings offer system, bundled Roboto Mono and JetBrains Mono choices and locally imported TTF/OTF fonts up to 512 KB, with deletion. Choose monospaced imports for aligned code.
+
+Vue DevTools is opt-in. Opening the developer console selects Console first, and the overlay stays within 25–85% of the viewport. The legacy Vue iframe stays inside that panel. The DOM explorer includes compatibility adapters for Eruda 3’s utilities and Elements selection API.

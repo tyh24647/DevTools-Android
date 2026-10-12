@@ -8,7 +8,7 @@ try {
  await page.evaluate(()=>{globalThis.updates=[];globalThis.editorBridge={postMessage:data=>updates.push(JSON.parse(data))};DevToolsEditor.init('const userDefinedValue = 42;\nuserD','userscript',{theme:'dark',closeBrackets:true,matchBrackets:true,invisibles:true,wrap:true});});
  await page.evaluate(()=>{const view=DevToolsEditor.view();view.dispatch({selection:{anchor:view.state.doc.length}});view.focus();DevToolsEditor.complete();});
  await page.getByRole('option',{name:'userDefinedValue',exact:true}).waitFor();
- await page.keyboard.press('Enter');
+ await page.getByRole('option',{name:'userDefinedValue',exact:true}).click();
  assert.match(await page.evaluate(()=>DevToolsEditor.snapshot().source),/\nuserDefinedValue$/);
  await page.evaluate(()=>DevToolsEditor.configure({theme:'light',closeBrackets:false,matchBrackets:false,invisibles:false,wrap:true,indentSize:4}));
  assert.equal(await page.locator('html').getAttribute('data-theme'),'light');

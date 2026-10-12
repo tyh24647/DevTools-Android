@@ -15,16 +15,22 @@
     <label class="toggle"><input type="checkbox" id="runEverywhere" name="runEverywhere" aria-describedby="rules-help"> Run on every webpage</label>
     <p id="rules-help">When off, only selected AllowLists run. Blacklists always take priority.</p>
   </fieldset>
-  <p id="lists">Manage Firefox lists in DevTools → Browsers → Firefox.</p>
+  <p id="lists">Manage Firefox lists in DevTools → Browser settings → Firefox.</p>
   <div class="controls">
     <button type="button" data-command="show">Show console</button>
     <button type="button" data-command="hide">Hide console</button>
     <button type="button" data-command="stop">Stop on this page</button>
     <button type="button" id="sync">Sync with app</button>
   </div>
+  <fieldset><legend>Page tools</legend>
+    <label class="toggle"><input type="checkbox" id="media-connected"> Save media into DevTools</label>
+    <p>Each save needs confirmation in the DevTools app. Keep the paired app running for downloads and live recording.</p>
+    <label class="toggle"><input type="checkbox" id="media-cookies"> Include site cookies for authenticated media</label>
+    <button type="button" id="scripts">Manage Firefox scripts and plugins</button>
+  </fieldset>
   <p id="status" role="status" aria-live="polite">Loading Firefox settings…</p>
   <details><summary>Pair with DevTools app</summary>
-    <p id="pair-help">In DevTools → Browsers → Firefox, copy the pairing code. Keep the app running to sync.</p>
+    <p id="pair-help">In DevTools → Browser settings → Firefox, copy the pairing code. Keep the app running to sync.</p>
     <form id="pair-form">
       <label for="pair-code">Pairing code</label>
       <input type="password" id="pair-code" name="pairCode" required maxlength="60" autocapitalize="off" spellcheck="false" aria-describedby="pair-help">
