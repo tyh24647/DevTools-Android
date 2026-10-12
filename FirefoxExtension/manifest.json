@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "DevTools \u2014 Browser Console Preview",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Open an on-page developer console in the current Firefox tab.",
   "permissions": [
     "activeTab",
@@ -48,6 +48,21 @@
       ],
       "run_at": "document_idle",
       "all_frames": false
+    }
+  ],
+  "optional_permissions": [
+    "userScripts",
+    "cookies"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "tools/frontends/*.gz"
+      ],
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ]
     }
   ]
 }

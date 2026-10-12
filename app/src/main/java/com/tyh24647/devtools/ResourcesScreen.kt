@@ -97,9 +97,9 @@ fun ResourcesScreen(activity:MainActivity) {
         confirmButton={TextButton(onClick={try{library.delete(file);delete=null}catch(error:Exception){activity.browser.notice=error.message}}){Text("Delete")}},
         dismissButton={TextButton(onClick={delete=null}){Text("Cancel")}})}
     if(options)AlertDialog(onDismissRequest={options=false},title={Text("Media settings")},text={Column(Modifier.verticalScroll(rememberScrollState()),verticalArrangement=Arrangement.spacedBy(10.dp)){
-        Row {Text("Show video quality options",Modifier.weight(1f));Switch(library.showQuality,{library.showQuality=it;library.settings()})}
+        Row {Text("Show video quality options",Modifier.weight(1f));DevToolsSwitch(library.showQuality,{library.showQuality=it;library.settings()})}
         Text("With quality options hidden, HLS saves the highest-resolution rendition, then highest bandwidth.")
-        Row {Text("Show hidden files",Modifier.weight(1f));Switch(library.showHidden,{library.showHidden=it;library.settings()})}
+        Row {Text("Show hidden files",Modifier.weight(1f));DevToolsSwitch(library.showHidden,{library.showHidden=it;library.settings()})}
         Text("Default folder: "+library.defaultFolder.ifEmpty {"App media"})
         FlowRow(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
             OutlinedButton(onClick={activity.chooseMediaDestination()}){Text("Choose export destination")}

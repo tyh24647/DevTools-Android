@@ -6,6 +6,10 @@ import android.view.ViewGroup
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -44,20 +48,22 @@ fun DevToolsUI(activity: MainActivity) {
             "blue" -> Color(0xFF60A5FA)
             else -> Color(0xFFA78BFA)
         }
-    val scheme =
-        if (dark)
-            darkColorScheme(
-                primary = accent,
-                background = Color(0xFF101427),
-                surface = Color(0xFF171C32),
-            )
-        else lightColorScheme(primary = accent, background = Color(0xFFF4F2FC))
+    val base = if (dark) Color.Black else Color.White
+    val scheme = (if (dark) darkColorScheme(primary = accent) else lightColorScheme(primary = accent)).copy(
+        background = base, surface = base, surfaceVariant = base, surfaceTint = Color.Transparent,
+        surfaceContainer = base, surfaceContainerHigh = base, surfaceContainerHighest = base,
+        surfaceContainerLow = base, surfaceContainerLowest = base, surfaceBright = base, surfaceDim = base,
+        primaryContainer = accent.copy(alpha = .14f), secondaryContainer = accent.copy(alpha = .12f),
+    )
     MaterialTheme(colorScheme = scheme) {
         Scaffold(
             bottomBar = {
                 Column {
                     Banner(activity)
-                    NavigationBar {
+                    NavigationBar(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp).clip(RoundedCornerShape(28.dp)).border(1.dp, (if (dark) Color.White else Color.Black).copy(alpha = .12f), RoundedCornerShape(28.dp)),
+                        containerColor = base.copy(alpha = .92f), tonalElevation = 0.dp,
+                    ) {
                         Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())) {
                         AppNavigation.visible(config.data).forEach { title ->
                             NavigationBarItem(
@@ -72,13 +78,13 @@ fun DevToolsUI(activity: MainActivity) {
                                 icon = {
                                     Icon(
                                         when (title) {
-                                            "Browser" -> Icons.Default.Language
-                                            "Browsers" -> Icons.Default.Tune
-                                            "Plugins" -> Icons.Default.Extension
-                                            "Resources" -> Icons.Default.Download
-                                            "Tools" -> Icons.Default.Build
-                                            "Pro" -> Icons.Default.Star
-                                            else -> Icons.Default.Settings
+                                            "Browser" -> Icons.Outlined.Language
+                                            "Browsers" -> Icons.Outlined.Tune
+                                            "Plugins" -> Icons.Outlined.Extension
+                                            "Resources" -> Icons.Outlined.Download
+                                            "Tools" -> Icons.Outlined.Build
+                                            "Pro" -> Icons.Outlined.StarOutline
+                                            else -> Icons.Outlined.Settings
                                         },
                                         contentDescription = AppNavigation.label(title),
                                     )
@@ -170,7 +176,7 @@ private fun Page(title: String, subtitle: String, content: @Composable ColumnSco
 
 @Composable
 private fun Panel(content: @Composable ColumnScope.() -> Unit) {
-    Card(Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.large) {
+    Column(Modifier.fillMaxWidth()) {
         Column(
             Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -198,7 +204,7 @@ private fun Toggle(
                 )
             }
         }
-        Switch(checked = checked, onCheckedChange = change, enabled = enabled)
+        DevToolsSwitch(checked = checked, onCheckedChange = change, enabled = enabled)
     }
 }
 
@@ -209,6 +215,7 @@ private fun BrowserScreen(activity: MainActivity) {
     var address by remember(tab?.id) { mutableStateOf(tab?.url ?: "") }
     var tabsDialog by remember { mutableStateOf(false) }
     var menu by remember { mutableStateOf(false) }
+    var quick by remember { mutableStateOf(false) }
     LaunchedEffect(tab?.url) { address = tab?.url ?: "" }
     BackHandler(enabled = tab?.webView?.canGoBack() == true) { tab?.webView?.goBack() }
     Column(Modifier.fillMaxSize()) {
@@ -218,6 +225,21 @@ private fun BrowserScreen(activity: MainActivity) {
                 onValueChange = { address = it },
                 singleLine = true,
                 label = { Text("URL") },
+                leadingIcon = { Box {
+                    IconButton(onClick = { quick = true }) { Icon(Icons.Default.Tune, "Page settings") }
+                    DropdownMenu(expanded = quick, onDismissRequest = { quick = false }) {
+                        DropdownMenuItem(text = { Text("Desktop site") }, trailingIcon = { DevToolsSwitch(tab?.desktop == true, { browser.desktopMode(it) }) }, onClick = { browser.desktopMode(tab?.desktop != true) })
+                        DropdownMenuItem(text = { Text("Block popups") }, trailingIcon = { DevToolsSwitch(activity.configuration.data.optBoolean("blockPopups", true), { value -> browser.blockPopups(value) }) }, onClick = { browser.blockPopups(!activity.configuration.data.optBoolean("blockPopups", true)) })
+                        DropdownMenuItem(text = { Text("Block ads") }, trailingIcon = { DevToolsSwitch(activity.configuration.data.optBoolean("blockAds", false), { value -> activity.configuration.change { it.put("blockAds", value) }; tab?.webView?.reload() }) }, onClick = { activity.configuration.change { it.put("blockAds", !it.optBoolean("blockAds", false)) }; tab?.webView?.reload() })
+                        DropdownMenuItem(text = { Text(if (tab?.reader == true) "Exit reader mode" else "Reader mode") }, onClick = { quick = false; browser.reader() })
+                        Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                            TextButton(onClick = { browser.pageZoom(-10) }) { Text("−", style = MaterialTheme.typography.titleLarge) }
+                            TextButton(onClick = { browser.pageZoom(0) }) { Text("${tab?.pageZoom ?: 100}%") }
+                            TextButton(onClick = { browser.pageZoom(10) }) { Text("+", style = MaterialTheme.typography.titleLarge) }
+                        }
+                    }
+                } },
+                trailingIcon = { if (address.isNotEmpty()) IconButton(onClick = { address = "" }) { Icon(Icons.Default.Close, "Clear URL") } },
                 modifier = Modifier.weight(1f),
                 keyboardOptions =
                     androidx.compose.foundation.text.KeyboardOptions(
@@ -839,7 +861,7 @@ private fun ToolsScreen(activity: MainActivity) {
                 value = panelSize,
                 onValueChange = { panelSize = it },
                 onValueChangeFinished = { set("displaySize", panelSize.toDouble()) },
-                valueRange = 20f..100f,
+                valueRange = 25f..85f,
                 enabled = config.pro,
             )
             Text("Opacity: ${"%.2f".format(options.optDouble("transparency"))}")
@@ -983,6 +1005,7 @@ private fun SettingsScreen(activity: MainActivity) {
                 config.change { it.put("accent", value) }
             }
         }
+        CodeFontSettings(activity)
         Panel {
             Text("Console appearance", style = MaterialTheme.typography.titleMedium)
             Toggle("Wrap console and source text", checked = console.optBoolean("wrapText", true)) { value ->
@@ -1017,7 +1040,7 @@ private fun SettingsScreen(activity: MainActivity) {
                     Text(AppNavigation.label(id), Modifier.weight(1f))
                     IconButton(enabled = index > 0, onClick = {config.change {AppNavigation.move(it, id, -1)}}) {Icon(Icons.Default.ArrowUpward, "Move ${AppNavigation.label(id)} earlier")}
                     IconButton(enabled = index < order.lastIndex, onClick = {config.change {AppNavigation.move(it, id, 1)}}) {Icon(Icons.Default.ArrowDownward, "Move ${AppNavigation.label(id)} later")}
-                    Switch(checked = id in visible, enabled = id != "Settings", onCheckedChange = {show -> config.change {AppNavigation.show(it, id, show)}})
+                    DevToolsSwitch(checked = id in visible, enabled = id != "Settings", onCheckedChange = {show -> config.change {AppNavigation.show(it, id, show)}})
                 }
             }
             TextButton(onClick = {config.change {it.remove("navigationOrder"); it.remove("hiddenTabs")}}) {Text("Restore default tabs")}
@@ -1117,7 +1140,7 @@ private fun SettingsScreen(activity: MainActivity) {
     }
     if (licenses) {
         val text = remember {
-            activity.assets.open("THIRD-PARTY-NOTICES.txt").bufferedReader().use { it.readText() } + "\n\n" + activity.assets.open("editor/THIRD-PARTY-NOTICES.txt").bufferedReader().use { it.readText() } + "\n\n" + activity.assets.open("tools/SOURCE-FORMATTING-NOTICES.txt").bufferedReader().use { it.readText() }
+            activity.assets.open("THIRD-PARTY-NOTICES.txt").bufferedReader().use { it.readText() } + "\n\n" + activity.assets.open("editor/THIRD-PARTY-NOTICES.txt").bufferedReader().use { it.readText() } + "\n\n" + activity.assets.open("tools/SOURCE-FORMATTING-NOTICES.txt").bufferedReader().use { it.readText() } + "\n\n" + listOf("RobotoMono-OFL.txt", "JetBrainsMono-OFL.txt").joinToString("\n\n") { activity.assets.open("fonts/$it").bufferedReader().use { reader -> reader.readText() } }
         }
         AlertDialog(
             onDismissRequest = { licenses = false },
@@ -1132,4 +1155,11 @@ private fun SettingsScreen(activity: MainActivity) {
             confirmButton = { TextButton(onClick = { licenses = false }) { Text("Done") } },
         )
     }
+}
+
+@Composable
+fun DevToolsSwitch(checked: Boolean, onCheckedChange: ((Boolean) -> Unit)?, modifier: Modifier = Modifier, enabled: Boolean = true) {
+    Switch(checked = checked, onCheckedChange = onCheckedChange, modifier = modifier, enabled = enabled,
+        colors = SwitchDefaults.colors(checkedThumbColor = Color.White, uncheckedThumbColor = Color(0xFF999999),
+            disabledCheckedThumbColor = Color(0xFFBBBBBB), disabledUncheckedThumbColor = Color(0xFF777777)))
 }

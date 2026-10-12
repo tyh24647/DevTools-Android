@@ -24,3 +24,6 @@ summary { cursor: pointer; min-height: 48px; }
 small { margin-top: 16px; }
 
 body { min-height: 0; max-height: 100dvh; overflow-y: auto; }
+#source {white-space:pre-wrap;overflow-wrap:anywhere;font:14px/1.6 monospace;max-height:65dvh;overflow:auto}
+#files section {border-bottom:1px solid #77618f;padding-block:16px}
+#files button {margin:4px}

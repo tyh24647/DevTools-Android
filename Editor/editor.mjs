@@ -23,7 +23,7 @@ function declarations(context) {
  return {from:word.from,options:[...names.values()],validFor:/^[\w$]*$/};
 }
 function extensions() {
- return [settings.theme==='dark'?oneDark:[],settings.invisibles?[highlightWhitespace(),highlightSpecialChars()]:[],settings.matchBrackets?bracketMatching():[],settings.closeBrackets?closeBrackets():[],indentUnit.of(settings.indent==='tabs'?'\t':' '.repeat(settings.indentSize||2)),settings.wrap?EditorView.lineWrapping:[],EditorView.theme({'&':{height:'100%',fontSize:(settings.fontSize||14)+'px'},'.cm-scroller':{overflow:'auto',fontFamily:'monospace'},'.cm-content':{minHeight:'220px'}})];
+ return [settings.theme==='dark'?oneDark:[],settings.invisibles?[highlightWhitespace(),highlightSpecialChars()]:[],settings.matchBrackets?bracketMatching():[],settings.closeBrackets?closeBrackets():[],indentUnit.of(settings.indent==='tabs'?'\t':' '.repeat(settings.indentSize||2)),settings.wrap?EditorView.lineWrapping:[],EditorView.theme({'&':{height:'100%',fontSize:(settings.fontSize||14)+'px'},'.cm-scroller':{overflow:'auto',fontFamily:settings.codeFont||'monospace'},'.cm-content':{minHeight:'220px'}})];
 }
 function publish() {
  const source=view.state.doc.toString();const error=validateSource(source,kind);
@@ -37,7 +37,7 @@ window.DevToolsEditor={
   view=new EditorView({parent:document.querySelector('#editor'),state:EditorState.create({doc:source,extensions:[lineNumbers(),highlightActiveLine(),highlightActiveLineGutter(),drawSelection(),history(),foldGutter(),indentOnInput(),syntaxHighlighting(defaultHighlightStyle,{fallback:true}),keymap.of([...defaultKeymap,...historyKeymap,...completionKeymap,indentWithTab]),javascript(),javascriptLanguage.data.of({autocomplete:declarations}),autocompletion(),prefs.of(extensions()),keymap.of([{key:'Ctrl-Space',run:startCompletion}]),EditorView.updateListener.of(update=>{if(update.docChanged)publish();})]})});
   this.configure(options);publish();
  },
- configure(options){settings=options;document.documentElement.dataset.theme=settings.theme;view.dispatch({effects:prefs.reconfigure(extensions())});},
+ configure(options){settings=options;if(settings.codeFontData && /^data:font\/(ttf|otf);base64,[A-Za-z0-9+/=]+$/.test(settings.codeFontData)){const face=new FontFace('DevToolsCustom',`url("${settings.codeFontData}")`);face.load().then(font=>document.fonts.add(font)).catch(()=>{});}document.documentElement.dataset.theme=settings.theme;view.dispatch({effects:prefs.reconfigure(extensions())});},
  snapshot:publish,
  complete(){startCompletion(view);view.focus();},
  async format(){try{const result=await prettier.format(view.state.doc.toString(),{parser:'babel',plugins:[babel,estree],tabWidth:settings.indentSize||2,useTabs:settings.indent==='tabs',singleQuote:!!settings.singleQuote,semi:settings.semicolons!==false});view.dispatch({changes:{from:0,to:view.state.doc.length,insert:result}});}catch(error){document.querySelector('#status').textContent=error.message;}},

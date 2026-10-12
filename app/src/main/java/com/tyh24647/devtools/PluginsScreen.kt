@@ -113,7 +113,7 @@ fun PluginsScreen(activity:MainActivity) {
             Card(Modifier.fillMaxWidth()){Column(Modifier.padding(12.dp)){
                 Text(plugin.optString("name"),style=MaterialTheme.typography.titleMedium)
                 FlowRow{config.scriptTags.filter{it.optString("id") in tagIDs(plugin)}.forEach{tag->Text("● "+tag.optString("name")+"  ",color=tagColor(tag.optString("color")))}}
-                Row {Text("Enabled",Modifier.weight(1f));Switch(plugin.optBoolean("enabled"),{enabled->action{
+                Row {Text("Enabled",Modifier.weight(1f));DevToolsSwitch(plugin.optBoolean("enabled"),{enabled->action{
                     if(enabled&&kind=="userscript")UserscriptMetadata.validate(plugin.optString("source"))
                     config.change {root->root.getJSONArray("plugins").objects().first{it.optString("id")==id}.put("enabled",enabled)}
                 }})}

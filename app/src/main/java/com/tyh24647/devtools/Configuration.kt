@@ -245,7 +245,7 @@ class Configuration(context: Context) {
                         .put("positionY", 0)
                         .put("backend", "eruda")
                         .put("vueAdapter", "modern")
-                        .put("vue", true)
+                        .put("vue", false)
                         .put("resourceTiming", true)
                         .put("code", true)
                         .put("dom", true)
