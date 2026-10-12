@@ -5,7 +5,7 @@
     function message(type,url) {
         try {globalThis.devtoolsMedia?.postMessage(JSON.stringify({type,url,title:document.title.slice(0,160),hls:entries.get(url)?.hls||false,mime:entries.get(url)?.mime||""}));}catch{}
     }
-    function normalized(raw) {try {const url=new URL(raw,location.href);return /^https?:$/.test(url.protocol)?url.href:null;}catch{return null;}}
+    function normalized(raw) {if(typeof raw!=="string" || !raw.trim())return null;try {const url=new URL(raw,location.href);return /^https?:$/.test(url.protocol)?url.href:null;}catch{return null;}}
     function isMedia(url) {return /\.(m3u8|mp4|webm|m4v|mov|mkv|mp3|m4a|wav|ogg|png|jpe?g|gif|webp|avif)(?:[?#]|$)/i.test(url);}
     function add(raw,force=false,hls=false,mime="") {
         const url=normalized(raw);if(!url || (!force && !isMedia(url)))return;
@@ -85,8 +85,11 @@
         const manifests=[...entries.keys()].filter(url=>entries.get(url).hls);
         for(const video of document.querySelectorAll("video")) {
             if(video.closest("#eruda,dialog[data-devtools-preview]"))continue;
-            const src=normalized(video.currentSrc||video.src)||manifests.at(-1);
-            if(!src)continue;
+            const raw=video.currentSrc||video.getAttribute("src")||video.querySelector("source[src]")?.getAttribute("src");
+            const direct=normalized(raw);
+            // Empty/blob sources need the actual playlist, never the page URL.
+            const src=(direct!==location.href?direct:null)||manifests.at(-1);
+            if(!src){const previous=videoButtons.get(video);if(previous){message("unload",previous.url);previous.button.remove();videoButtons.delete(video);}continue;}
             let record=videoButtons.get(video);
             if(!record) {
                 const button=document.createElement("button");button.type="button";button.setAttribute("aria-label","Download or record this video");

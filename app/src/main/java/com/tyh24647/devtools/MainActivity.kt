@@ -70,9 +70,16 @@ class MainActivity : ComponentActivity() {
             try {
                 val library = MediaLibrary.get(this@MainActivity)
                 kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                    val name = contentResolver.query(uri, arrayOf(android.provider.OpenableColumns.DISPLAY_NAME), null, null, null)?.use {
+                    val name = contentResolver.query(
+                        uri,
+                        arrayOf(android.provider.OpenableColumns.DISPLAY_NAME),
+                        null,
+                        null,
+                        null
+                    )?.use {
                         if (it.moveToFirst()) it.getString(0) else null
-                    }?.replace(Regex("[/\\\\]"), "_")?.take(120) ?: "imported-" + System.currentTimeMillis()
+                    }?.replace(Regex("[/\\\\]"), "_")?.take(120)
+                        ?: ("imported-" + System.currentTimeMillis())
                     val folder = library.path(library.defaultFolder)
                     var target = java.io.File(folder, name)
                     if (target.exists()) target = java.io.File(folder, System.currentTimeMillis().toString() + "-" + name)

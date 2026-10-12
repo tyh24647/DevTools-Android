@@ -10,15 +10,16 @@ import java.io.File
 
 class MediaDocumentsProvider:DocumentsProvider() {
     private val library get()=MediaLibrary.get(context!!)
+    private val title get()=context!!.applicationInfo.loadLabel(context!!.packageManager).toString()+" media"
     override fun onCreate()=true
     private fun file(id:String)=library.path(if(id=="root") "" else id.removePrefix("media:"))
     private fun id(file:File)=if(file==library.root)"root" else "media:"+file.relativeTo(library.root).path
     override fun queryRoots(projection:Array<out String>?):Cursor {
-        val columns=projection?:arrayOf(Root.COLUMN_ROOT_ID,Root.COLUMN_DOCUMENT_ID,Root.COLUMN_TITLE,Root.COLUMN_FLAGS,Root.COLUMN_MIME_TYPES,Root.COLUMN_AVAILABLE_BYTES)
+        val columns=projection?:arrayOf(Root.COLUMN_ROOT_ID,Root.COLUMN_DOCUMENT_ID,Root.COLUMN_TITLE,Root.COLUMN_ICON,Root.COLUMN_FLAGS,Root.COLUMN_MIME_TYPES,Root.COLUMN_AVAILABLE_BYTES)
         val cursor=MatrixCursor(columns)
         val row=cursor.newRow()
         for(column in columns)row.add(column,when(column) {
-            Root.COLUMN_ROOT_ID->"media";Root.COLUMN_DOCUMENT_ID->"root";Root.COLUMN_TITLE->"DevTools media"
+            Root.COLUMN_ROOT_ID->"media";Root.COLUMN_DOCUMENT_ID->"root";Root.COLUMN_TITLE->title;Root.COLUMN_ICON->R.mipmap.ic_launcher
             Root.COLUMN_FLAGS->Root.FLAG_SUPPORTS_CREATE or Root.FLAG_SUPPORTS_IS_CHILD
             Root.COLUMN_MIME_TYPES->"*/*";Root.COLUMN_AVAILABLE_BYTES->library.root.usableSpace;else->null
         })
@@ -27,7 +28,7 @@ class MediaDocumentsProvider:DocumentsProvider() {
     private fun row(cursor:MatrixCursor,columns:Array<out String>,file:File) {
         val row=cursor.newRow()
         for(column in columns)row.add(column,when(column) {
-            Document.COLUMN_DOCUMENT_ID->id(file);Document.COLUMN_DISPLAY_NAME->if(file==library.root)"DevTools media" else file.name
+            Document.COLUMN_DOCUMENT_ID->id(file);Document.COLUMN_DISPLAY_NAME->if(file==library.root)title else file.name
             Document.COLUMN_MIME_TYPE->if(file.isDirectory)Document.MIME_TYPE_DIR else MediaLibrary.mime(file)
             Document.COLUMN_SIZE->file.length();Document.COLUMN_LAST_MODIFIED->file.lastModified()
             Document.COLUMN_FLAGS->if(file.isDirectory)Document.FLAG_DIR_SUPPORTS_CREATE or (if(file==library.root)0 else Document.FLAG_SUPPORTS_DELETE) else Document.FLAG_SUPPORTS_WRITE or Document.FLAG_SUPPORTS_DELETE

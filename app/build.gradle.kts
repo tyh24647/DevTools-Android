@@ -14,6 +14,8 @@ android {
         versionCode = 1
         versionName = "1.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders["appLabel"] = "@string/app_name"
+        buildConfigField("int", "FIREFOX_PORT", "18746")
         manifestPlaceholders["admobAppId"] =
             providers
                 .gradleProperty("admobAppId")
@@ -49,6 +51,15 @@ android {
             applicationIdSuffix = ".debug"
             buildConfigField("boolean", "PREVIEW_PRO", "true")
         }
+        create("preview") {
+            initWith(getByName("debug"))
+            applicationIdSuffix = ".preview"
+            versionNameSuffix = "-preview"
+            matchingFallbacks += listOf("debug")
+            resValue("string", "preview_app_name", "DevTools Preview")
+            manifestPlaceholders["appLabel"] = "@string/preview_app_name"
+            buildConfigField("int", "FIREFOX_PORT", "18748")
+        }
         release {
             isMinifyEnabled = true
             buildConfigField("boolean", "PREVIEW_PRO", "false")
@@ -62,6 +73,7 @@ android {
         compose = true
         buildConfig = true
     }
+    testBuildType = providers.gradleProperty("testBuildType").getOrElse("debug")
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17

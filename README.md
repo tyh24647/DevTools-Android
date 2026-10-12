@@ -21,6 +21,8 @@ DevTools defaults to **enabled**, **run on every webpage**, and **automatic tool
 
 The APK is generated at `app/build/outputs/apk/debug/app-debug.apk`. Local packaged builds may also be available in `Build/`; that directory is excluded from Git. The debug package is `com.tyh24647.devtools.debug`; release is `com.tyh24647.devtools`.
 
+For an installation alongside either older build, run `./gradlew :app:assemblePreview` and install `app/build/outputs/apk/preview/app-preview.apk`. This app is labeled **DevTools Preview**, uses `com.tyh24647.devtools.preview`, keeps separate data, and pairs over port `18748`. Build its separate Firefox companion with `npm run build:firefox -- --side-by-side`; the result is `Build/DevTools-Firefox-side-by-side.xpi`, with a distinct add-on ID and pairing port. Pair it using the code from the preview app. This XPI is unsigned, like the ordinary local extension build; building it does not install it or change an existing Firefox add-on. Device tests for this variant use `-PtestBuildType=preview`.
+
 JavaScript tools and the code editor are bundled, so npm is only needed when rebuilding those assets or running JavaScript tests. Debug builds include a switchable **Pro preview** for development; release builds do not.
 
 ## Included behavior

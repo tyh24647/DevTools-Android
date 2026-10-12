@@ -32,7 +32,9 @@ class MediaTask(val media: PageMedia, val choice: MediaChoice, val folder: Strin
     var job: Job?=null
 }
 class MediaLibrary private constructor(val context: Context) {
-    val root=File(context.filesDir,"media").apply {mkdirs()}
+    // Android's /data/user/0 alias may resolve to /data/data. Use one base for
+    // both directory listings and relative paths shared with DocumentsProvider.
+    val root=File(context.filesDir,"media").canonicalFile.apply {mkdirs()}
     val tasks=mutableStateListOf<MediaTask>()
     val detected=mutableStateListOf<PageMedia>()
     var revision by mutableStateOf(0)
@@ -144,7 +146,10 @@ class MediaLibrary private constructor(val context: Context) {
     }
     private suspend fun fetchTo(url:String,media:PageMedia,file:File,range:HlsRange?,progress:(Long,Long)->Unit={_,_->}):String {
         val conn=response(url,media,range)
-        try {conn.inputStream.use {input->file.outputStream().use {output->
+        try {
+            val type=conn.contentType.orEmpty().substringBefore(';').trim().lowercase()
+            require(type !in listOf("text/html", "application/xhtml+xml")) {"The server returned a webpage instead of media. Reload the video and select its stream again."}
+            conn.inputStream.use {input->file.outputStream().use {output->
             val buffer=ByteArray(64*1024);var count=0L;var last=0L
             while(true) {currentCoroutineContext().ensureActive();val size=input.read(buffer);if(size<0)break;output.write(buffer,0,size);count+=size
                 if(count-last>512*1024){progress(count,conn.contentLengthLong);last=count}}

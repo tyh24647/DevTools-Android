@@ -70,6 +70,7 @@ fun ResourcesScreen(activity:MainActivity) {
         }}}
         Text(relative.ifEmpty {"App media"},style=MaterialTheme.typography.titleLarge)
         FlowRow {
+            TextButton(onClick={activity.importMedia()}){Text("Import file")}
             if(relative.isNotEmpty())TextButton(onClick={relative=File(relative).parent.orEmpty()}){Text("Up")}
             TextButton(onClick={folderName=""}){Text("New folder")}
             TextButton(onClick={library.defaultFolder=relative;library.settings()}){Text("Set as default download destination")}

@@ -20,14 +20,14 @@ class FirefoxSync(private val activity: MainActivity, private val config: Config
             Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING,
         ).also { prefs.edit().putString("token", it).apply() }
     }
-    val pairingCode: String get() = "18746.$token"
+    val pairingCode: String get() = "${BuildConfig.FIREFOX_PORT}.$token"
 
     fun start() {
         scope.launch {
             try {
                 val listener = ServerSocket().apply {
                     reuseAddress = true
-                    bind(java.net.InetSocketAddress(InetAddress.getByName("127.0.0.1"), 18746), 4)
+                    bind(java.net.InetSocketAddress(InetAddress.getByName("127.0.0.1"), BuildConfig.FIREFOX_PORT), 4)
                 }
                 server = listener
                 listener.use {

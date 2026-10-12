@@ -38,5 +38,20 @@ try {
  assert.ok(await page.evaluate(()=>messages.some(m=>m.type==='save'&&m.url.endsWith('photo.png'))));
  await page.evaluate(()=>{__DTMedia.status('https://fixture.test/vod.m3u8','Recording',null,true,true);document.querySelector('body > video').remove();__DTMedia.refresh();});
  assert.ok(await page.evaluate(()=>messages.some(m=>m.type==='unload')));
+ await page.evaluate(()=>{
+  __DTMedia.status('https://fixture.test/vod.m3u8','',null,false,false);
+  messages.length=0;
+  const video=document.createElement('video');video.width=320;video.height=180;document.body.prepend(video);
+  __DTMedia.refresh();
+ });
+ await page.getByRole('button',{name:'Download or record this video'}).click();
+ assert.ok(await page.evaluate(()=>messages.some(m=>m.type==='save'&&m.url==='https://fixture.test/vod.m3u8'&&m.hls)), 'Empty video sources must use a detected HLS playlist, not the page URL');
+ assert.equal(await page.evaluate(()=>messages.some(m=>m.type==='save'&&m.url===location.href)),false);
+ await page.evaluate(()=>{
+  messages.length=0;document.querySelector('body > video').src='blob:https://fixture.test/player';
+  __DTMedia.add('https://fixture.test/stream?id=1',true,true);__DTMedia.refresh();
+ });
+ await page.getByRole('button',{name:'Download or record this video'}).click();
+ assert.ok(await page.evaluate(()=>messages.some(m=>m.type==='save'&&m.url==='https://fixture.test/stream?id=1'&&m.hls)), 'Blob video sources must resolve to the HLS playlist, including extensionless URLs');
  console.log('PASS: visible-video download button, native save request, Eruda video section before images, modal preview and source-unload signal.');
 } finally {await browser.close();}
