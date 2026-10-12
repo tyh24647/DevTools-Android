@@ -232,7 +232,7 @@ class MediaLibrary private constructor(val context: Context) {
                 currentCoroutineContext().ensureActive();var added=false
                 for((stream,list) in lists.withIndex()) {
                     val candidates=if(task.choice.live && seen[stream].size==1)list.segments.takeLast(3) else list.segments
-                    for(seg in candidates.filter {!seen[stream].contains(it.sequence) || (task.choice.live && it.sequence <= (seen[stream].maxOrNull() ?: -1L))}) {
+                    for(seg in candidates.filter {if(task.choice.live) it.sequence > (seen[stream].maxOrNull() ?: -1L) else !seen[stream].contains(it.sequence)}) {
                         if(task.stopRequested && task.choice.live)break
                         if(task.choice.live) require(seg.sequence <= (seen[stream].maxOrNull() ?: seg.sequence)+1) {"A live segment expired before it could be recorded."}
                         val file=File(temp,"segment-"+stream)
